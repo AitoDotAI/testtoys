@@ -9,6 +9,8 @@ It can be combined with JUnit for proper IDE integration.
 usage example:
 --------------
 
+Let's examine following unittest example:
+
     import org.junit.*;
     import static org.junit.Assert.*;
     import java.io.IOException;
