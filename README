@@ -127,25 +127,26 @@ To be able to see diff between old and new result, install meld:
 more on usage:
 --------------
 
-First time the previous mentioned ExampleTest is run, it will generate
+The first time the ExampleTest is run, it will generate
 output in 
    
     testio/example/plus_out.txt
 
-file. If you are happy with the output, you can freeze it. 
-In this case the expectation file...
+file. After you freeze the file it will be renamed as...
 
     testio/example/plus_exp.txt
  
-...is generated.
+If test fails, both plus_out.txt and plus_exp.txt will remain so 
+you can later compare the differences and try identify the 
+cause of failure.
 
 If you create new files with the testtool, the files will 
 be created in 
 
     testio/example/plus_out/file1.txt
 
-kind of directory. This directory will be cleansed, when
-ever the test is ran again.
+kind of directory. This directory will be cleaned, when
+the test is ran again.
 
 After freezing the expectation files, you likely want to 
 add testio/*/*_exp.txt files into your repository. 
