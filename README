@@ -109,16 +109,15 @@ your sbt project:
       "com.novocode" % "junit-interface" % "0.11" % Test
      )
 
-To be able to see diff between old and new result, install meld: 
-
-    sudo apt install meld
-
 First line adds the testtoy. Second adds the needed junit library 
 and the third line adds sbt junit integration so that you 
 can run the tests with:
 
     sbt test
 
+To be able to see diff between old and new result, install meld: 
+
+    sudo apt install meld
 
 
 
