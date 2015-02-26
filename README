@@ -6,16 +6,6 @@ texttoys is a test tool for text-based behavioral testing.
 I can be combined with JUnit for IDE integration. 
 
 
-acknowledgments: 
-----------------
-
-  Thanks for Ferenc Dosa-Racz for showing the way with his 
-  ITK (integrated testkit). 
-
-  This is not novel idea, and you can find behavioral text
-  based comparison tools elsewhere like the texttest 
-  tool by Geoff Bache and Daniel Galdames.
-
 
 benefits:
 ---------
@@ -78,6 +68,7 @@ can run the tests with:
 
 
 
+
 usage:
 ------
 
@@ -117,14 +108,38 @@ you to use diff tool to compare results. If the new
 results are ok, you can freeze them by inputing [i]. If not, 
 you can ignore the results.
 
+
+practicalities:
+---------------
+
 After freezing the expectation files, you want to add 
-testio/*/*_exp.txt files into your repository. You may 
-want make your clean script remove all testio/*/*_out.txt
-files and testio/*/*_out directories. 
+testio/*/*_exp.txt files into your repository. 
+
+You likely want make your clean script remove all
+testio/*/*_out.txt files and testio/*/*_out directories. 
+
+Also you want to add *_out.txt and *_out files into
+your gitignore file.
 
 
-way forward:
-------------
+acknowledgements:
+-----------------
+
+  Thanks for Ferenc Dosa-Racz for showing the way with his 
+  ITK (integrated testkit). 
+
+  This is not a novel idea, and you can find behavioral text
+  based comparison tools elsewhere like the texttest 
+  tool by Geoff Bache and Daniel Galdames.
+
+  This tool was created merely to provide similar kind of
+  functionality in Java / JVM environment and to suit
+  my individual tastes.
+
+
+
+the way forward:
+----------------
 
 testtoys is not 100% production complete. It is simple and it works, 
 but e.g. shipping the expectation text files within a test jar file 
@@ -156,7 +171,5 @@ partly ignored:
 In this case the area between '{' and '}' would form a scope, which
 can have varying amount of lines.
  
-
-
 
 
