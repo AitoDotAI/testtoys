@@ -6,7 +6,7 @@ texttoys is a test tool for text-based behavioral testing.
 I can be combined with JUnit for IDE integration. 
 
 
-Acknowledgments: 
+acknowledgments: 
 ----------------
 
   Thanks for Ference dosa'Racz for showing the way with his 
@@ -17,16 +17,51 @@ Acknowledgments:
   tool by Geoff Bache and Daniel Galdames.
 
 
+benefits:
+---------
+
+   * Enables rapid behavioral testing. The effort level
+     of creating a unittest case is similar to printing 
+     debug info with System.out.println();  
+
+   * The benefit compared to traditional unit testing is:
+
+       * Greatly reduced effort and increased speed of creating tests
+          * No precreated vectors containing right orders & results
+          * No checking of each function result with custom comparison
+          -> You get better test coverage for less work
+
+       * Fast comparison to old results: 
+          * If you are measuring things, without 'one right answer' 
+            like performance, error/quality rates or orders, 
+            you can easily see the difference between old result
+            and the new one. 
+
+       * Greatly reduced effort in maintaining the results
+          * No updating of result vectors or result objects
+            Just selecte [f]reeze and you have new expected result.
+          * This is HUGE deal, when developing software, which 
+            doesn't create single correct results, but where results
+            improve with every iteration. When improving results
+            little by little it would be major pair to update
+            parts of the unittest code, whenever results change. 
+
+       * Self-documenting & generates 'documentation of expected behavior'
+          * The generated file can document itself by simply printing
+            comments on the results . 
+          * output it  and it form 
+            a natural description of the system's behavior
+
 
 
 setup:
 ------
 
-to install testtoys in your local repository, use: 
+To install testtoys in your local repository, use: 
 
     sbt publishLocal
 
-to use texttoys in your project, add following dependencies into
+To use texttoys in your project, add following dependencies into
 your sbt project:
 
     libraryDependencies ++= Seq(
@@ -40,6 +75,7 @@ and the third line adds sbt junit integration so that you
 can run the tests with:
 
     sbt test
+
 
 
 usage:
@@ -82,35 +118,6 @@ results are ok, you can freeze them by inputing [i]. If not,
 you can ignore the results.
 
 
-benefits:
----------
-
-   * Enables rapid behavioral testing. The effort level
-     of creating a unittest case is similar to printing 
-     debug info with System.out.println();  
-
-   * The benefit compared to traditional unit testing is:
-
-       * Greatly reduced effort and increased speed of creating tests
-          * No precreated vectors containing right orders & results
-          * No checking of each function result with custom comparison
-          -> You get better test coverage for less work
-
-       * Fast comparison to old results: 
-          * If you are measuring things, without 'one right answer' 
-            like performance, error/quality rates or orders, 
-            you can easily see the difference between old result
-            and the new one. 
-
-       * Greatly reduced effort in maintaining the results
-          * No updating of result vectors or result objects
-            Just selecte [f]reeze and you have new expected result.
-
-       * Self-documenting + generates 'documentation of expected' behavior
-          * The generated file can document itself by simply printing
-            comments on the results . 
-          * output it  and it form 
-            a natural description of the system's behavior
 
 maintenance:
 ------------
@@ -139,17 +146,17 @@ partly ignored:
   log: {
      10:20 Random thing happened
      10:21 Location of this may change
-     10:23 X HAPPENED 
-     10:25 HUGE ERROR!!!
+     10:23 X occurred 
+     10:25 ERROR!!!
      10:26 This line may appear in log, or not 
   }
 
-  analysis: {
-    X HAPPENED - ok 
-    HUGE ERROR!!! - failed 
+  found: {
+    X occurred - ok 
+    ERROR!!! - failed 
   }
 
-In this case the are between '{' and '}' would form a scope, which
+In this case the area between '{' and '}' would form a scope, which
 can have varying amount of lines.
  
 
