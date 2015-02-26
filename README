@@ -9,8 +9,8 @@ I can be combined with JUnit for IDE integration.
 acknowledgments: 
 ----------------
 
-  Thanks for Ference dosa'Racz for showing the way with his 
-  ITK (integrated toolkit). 
+  Thanks for Ferenc Dosa-Racz for showing the way with his 
+  ITK (integrated testkit). 
 
   This is not novel idea, and you can find behavioral text
   based comparison tools elsewhere like the texttest 
