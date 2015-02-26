@@ -1,0 +1,158 @@
+testtoys
+--------
+
+texttoys is a test tool for text-based behavioral testing. 
+
+I can be combined with JUnit for IDE integration. 
+
+
+Acknowledgments: 
+----------------
+
+  Thanks for Ference dosa'Racz for showing the way with his 
+  ITK (integrated toolkit). 
+
+  This is not novel idea, and you can find behavioral text
+  based comparison tools elsewhere like the texttest 
+  tool by Geoff Bache and Daniel Galdames.
+
+
+
+
+setup:
+------
+
+to install testtoys in your local repository, use: 
+
+    sbt publishLocal
+
+to use texttoys in your project, add following dependencies into
+your sbt project:
+
+    libraryDependencies ++= Seq(
+      "com.futurice" %% "testtoys" % "0.1-SNAPSHOT" % "test",
+      "junit" % "junit" % "4.8" % "test",
+      "com.novocode" % "junit-interface" % "0.11" % Test
+     )
+
+First line adds the testtoy. Second adds the needed junit library 
+and the third line adds sbt junit integration so that you 
+can run the tests with:
+
+    sbt test
+
+
+usage:
+------
+
+testtoys tests can be used as an example of how testtoys is used. 
+
+Here's another example: 
+
+  import org.junit.*;
+  import static org.junit.Assert.*;
+
+  public class ExampleTest {	
+      @Test
+      public void testPlus() throws IOException  {
+          TestTool t = new TestTool("testio/example/plus"); 
+		
+          t.tln("testing plus operation"); 
+          t.tln("  1+1=" + (1+1));
+  
+          assertTrue(t.done());
+      }
+  }
+
+First time the test is run, it will generate output in 
+   
+  testio/example/plus_out.txt
+
+file. If you are happy with the output, you can freeze it. 
+In this case the expectation file...
+
+  testio/example/plus_exp.txt
+ 
+...is generated.
+
+If the output of the program changes, the test will break. 
+In this case, the test will print you differences and allow
+you to use diff tool to compare results. If the new 
+results are ok, you can freeze them by inputing [i]. If not, 
+you can ignore the results.
+
+
+benefits:
+---------
+
+   * Enables rapid behavioral testing. The effort level
+     of creating a unittest case is similar to printing 
+     debug info with System.out.println();  
+
+   * The benefit compared to traditional unit testing is:
+
+       * Greatly reduced effort and increased speed of creating tests
+          * No precreated vectors containing right orders & results
+          * No checking of each function result with custom comparison
+          -> You get better test coverage for less work
+
+       * Fast comparison to old results: 
+          * If you are measuring things, without 'one right answer' 
+            like performance, error/quality rates or orders, 
+            you can easily see the difference between old result
+            and the new one. 
+
+       * Greatly reduced effort in maintaining the results
+          * No updating of result vectors or result objects
+            Just selecte [f]reeze and you have new expected result.
+
+       * Self-documenting + generates 'documentation of expected' behavior
+          * The generated file can document itself by simply printing
+            comments on the results . 
+          * output it  and it form 
+            a natural description of the system's behavior
+
+maintenance:
+------------
+
+You want to add testio/*/*_exp.txt files into your repository. 
+
+
+
+way forward:
+------------
+
+testtoys is not 100% production complete. It is simple and it works, 
+but e.g. shipping the expectation text files within a test jar file 
+is not supported. Without doubt, it also missing useful functionality
+and it may have bugs.
+
+It would be especially nice to have scopes, so that you can have
+dynamically sized test areas. This could be especially useful
+if you printing in test files things like log, which content can be
+partly ignored:
+
+  We are going to do X. It needs to happen without errors.
+
+  Starting test...
+
+  log: {
+     10:20 Random thing happened
+     10:21 Location of this may change
+     10:23 X HAPPENED 
+     10:25 HUGE ERROR!!!
+     10:26 This line may appear in log, or not 
+  }
+
+  analysis: {
+    X HAPPENED - ok 
+    HUGE ERROR!!! - failed 
+  }
+
+In this case the are between '{' and '}' would form a scope, which
+can have varying amount of lines.
+ 
+
+
+
+

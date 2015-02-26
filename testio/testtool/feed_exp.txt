@@ -1,0 +1,12 @@
+feedToken(object) can be used to do more specific comparisons, e.g:
+
+t.feedToken(RelativeRange(100, 1.10)) matches numeric range 91-110
+feeding 92
+  compared to 92
+
+t.feedToken(RelativeRange(100, 2.)) matches numeric range 50-200
+feeding 184
+  compared to 184
+
+the comparison object need to fullfil equals() so that it reads string
+and toString() so that it can be printed in output

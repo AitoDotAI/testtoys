@@ -12,8 +12,8 @@ import java.util.TreeMap;
 public class TestSuite {
 	private class TestEntry {
 		final String PATH;
-		final Test TEST;
-		public TestEntry(String path, Test test) {
+		final TestCase TEST;
+		public TestEntry(String path, TestCase test) {
 			PATH = path; TEST = test;
 		}
 	}
@@ -23,7 +23,7 @@ public class TestSuite {
 		this.rootPath = rootPath; 
 		tests = new ArrayList<TestEntry>();
 	}
-	public void add(String path, Test test) {
+	public void add(String path, TestCase test) {
 		tests.add(new TestEntry(path, test)); 
 	}
 	public void exec(String[] args) throws IOException {

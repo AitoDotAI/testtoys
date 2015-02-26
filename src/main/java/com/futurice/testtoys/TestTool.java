@@ -22,7 +22,7 @@ public class TestTool {
 	public final static String UNDEFINED = "__UNDEFINED__";
 	public final static String EOF = "__EOF__";
 	
-	private File path;
+	private File filePath;
 	private FileWriter out;
 	private PrintStream report;
 	private BufferedReader exp;
@@ -60,9 +60,9 @@ public class TestTool {
 		}
 		
 		this.report = report;
-		this.path = path;
 		outFile = new File(path + "_out.txt");
 		expFile = new File(path + "_exp.txt");
+		this.filePath = new File(path + "_out");
 		
 		out = new FileWriter(outFile);
 		try {
@@ -79,12 +79,12 @@ public class TestTool {
 		exp.close(); 
 	}
 	public File file(String filename) {
-		path.mkdir(); 
-		return new File(path, filename);
+		filePath.mkdir(); 
+		return new File(filePath, filename);
 	}
 	public File dataFile(String filename) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'hhmm");
-		return new File(path + "_" + filename + "_" + sdf.format(new Date()));
+		return new File(filePath + "_" + filename + "_" + sdf.format(new Date()));
 	}
 	public void prepareLine() throws IOException {
 		outline = new StringBuffer(); 
@@ -244,18 +244,18 @@ public class TestTool {
 			boolean freeze = (config == AUTOMATIC_FREEZE);
 			if (config == INTERACTIVE) {
 				while (true) {
-					System.out.print("freeze [f] or diff [d]?"); 
+					System.out.print("diff[d], ignore[i] or freeze[f]?"); 
 					String line = new BufferedReader(new InputStreamReader(System.in)).readLine();
-					if (line.equals("f")) {
-						freeze = true;
-						break;
-					} if (line.equals("d")) {
+					if (line.equals("d")) {
 					    String[] params = new String [3];
 					    params[0] = "/usr/bin/meld";
 					    params[1] = expFile.getAbsolutePath();
 					    params[2] = outFile.getAbsolutePath();
 					    Runtime.getRuntime().exec(params);
-					} else {
+					} else if (line.equals("f")) {
+						freeze = true;
+						break;
+					} else if (line.equals("i")){
 						freeze = false;
 						break;
 					}

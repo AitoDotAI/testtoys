@@ -1,0 +1,9 @@
+for performance testing we can use peekLong() facility
+let's measure how long sleeping 100ms takes
+sleep(100) took 100 ms
+old result was 100
+ok, no significant difference
+
+using peeks is unfortunately verbose in code,
+but this is mostly because comparisons, which 
+tend to be case specific any way.

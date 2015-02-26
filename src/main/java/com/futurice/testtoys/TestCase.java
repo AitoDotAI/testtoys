@@ -1,5 +1,5 @@
 package com.futurice.txttest;
 
-public interface Test {
+public interface TestCase {
 	void test(TestTool t) throws Exception; 
 }

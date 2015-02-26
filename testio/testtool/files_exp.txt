@@ -1,0 +1,16 @@
+file(filename) can be used to get names for files in test directory
+each test case has its very own directory, where file are written.
+
+let's create a file
+this file has name test.txt
+path is /home/arau/arau/work/libraries/texttest/testio/testtool/files/test.txt
+path may vary, so we printed it with iln(str)
+
+let's write content in the file.
+you can easily feed the file back to test tool for testing.
+file content is this:
+
+lorem ipsum
+foo bar
+
+if the content changes, the test will break.

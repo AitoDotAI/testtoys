@@ -1,0 +1,5 @@
+line printed with tln(string) needs to remain as it is
+tfln(string, format) is for formatting things like these 03 31 3.1
+iln(string) prints changing content without breaking test. time is 1424939274370
+
+the nice thing in the test tool is that it's self documenting
