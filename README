@@ -117,13 +117,10 @@ you to use diff tool to compare results. If the new
 results are ok, you can freeze them by inputing [i]. If not, 
 you can ignore the results.
 
-
-
-maintenance:
-------------
-
-You want to add testio/*/*_exp.txt files into your repository. 
-
+After freezing the expectation files, you want to add 
+testio/*/*_exp.txt files into your repository. You may 
+want make your clean script remove all testio/*/*_out.txt
+files and testio/*/*_out directories. 
 
 
 way forward:
