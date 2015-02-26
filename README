@@ -6,8 +6,8 @@ It can be combined with JUnit for proper IDE integration.
 
 
 
-the code example:
------------------
+usage example:
+--------------
 
     import org.junit.*;
     import static org.junit.Assert.*;
@@ -124,57 +124,36 @@ To be able to see diff between old and new result, install meld:
 
 
 
-usage:
-------
+more on usage:
+--------------
 
-testtoys tests can be used as an example of how testtoys is used. 
-
-Here's another example: 
-
-  import org.junit.*;
-  import static org.junit.Assert.*;
-
-  public class ExampleTest {	
-      @Test
-      public void testPlus() throws IOException  {
-          TestTool t = new TestTool("testio/example/plus"); 
-		
-          t.tln("testing plus operation"); 
-          t.tln("  1+1=" + (1+1));
-  
-          assertTrue(t.done());
-      }
-  }
-
-First time the test is run, it will generate output in 
+First time the previous mentioned ExampleTest is run, it will generate
+output in 
    
-  testio/example/plus_out.txt
+    testio/example/plus_out.txt
 
 file. If you are happy with the output, you can freeze it. 
 In this case the expectation file...
 
-  testio/example/plus_exp.txt
+    testio/example/plus_exp.txt
  
 ...is generated.
 
-If the output of the program changes, the test will break. 
-In this case, the test will print you differences and allow
-you to use diff tool to compare results. If the new 
-results are ok, you can freeze them by inputing [i]. If not, 
-you can ignore the results.
+If you create new files with the testtool, the files will 
+be created in 
 
+    testio/example/plus_out/file1.txt
 
+kind of directory. This directory will be cleansed, when
+ever the test is ran again.
 
-practicalities:
----------------
+After freezing the expectation files, you likely want to 
+add testio/*/*_exp.txt files into your repository. 
 
-After freezing the expectation files, you want to add 
-testio/*/*_exp.txt files into your repository. 
-
-You likely want make your clean script remove all
+Also you likely want make your clean script remove all
 testio/*/*_out.txt files and testio/*/*_out directories. 
 
-Also you want to add *_out.txt and *_out files into
+Also you likely want to add *_out.txt and *_out files into
 your gitignore file.
 
 
