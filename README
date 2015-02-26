@@ -2,13 +2,62 @@ testtoys
 --------
 
 texttoys is a test tool for text-based behavioral testing. 
-
-I can be combined with JUnit for IDE integration. 
-
+It can be combined with JUnit for proper IDE integration. 
 
 
-benefits:
----------
+the code example:
+-----------------
+
+    import org.junit.*;
+    import static org.junit.Assert.*;
+    import java.io.IOException;
+
+    public class ExampleTest {	
+        @Test
+        public void testPlus() throws IOException  {
+            TestTool t = new TestTool("testio/example/plus"); 
+		
+            t.tln("testing plus operation"); 
+            t.tln("  1+1=" + (1+1));
+  
+            assertTrue(t.done());
+        }
+    }
+
+Running the test first time will create following output:
+
+    running testio/example/plus...
+  
+      testing plus operation
+        1+1=2
+
+    2 ms. [d]iff, [c]ontinue or [f]reeze?f
+    frozen.
+
+After freezing the behavior, the tool will create expectation file
+with following content
+
+    testing plus operation 
+      1+1=2
+
+If, for some reason the result changes (e.g. the result is 3), the 
+test will fail. 
+
+    running testio/example/plus...
+
+      testing plus operation
+    !   1+1=3                                         |  1+1=2
+
+    1 ms. 1 errors! [d]iff, [c]ontinue or [f]reeze?
+
+If the test is run in interactive mode, the developer can 
+mark the new result as ok by refreezing it. By installing 
+Meld, you can see proper diff between the old result
+and the new oen. 
+
+
+the benefits:
+-------------
 
    * Enables rapid behavioral testing. The effort level
      of creating a unittest case is similar to printing 
@@ -60,6 +109,10 @@ your sbt project:
       "com.novocode" % "junit-interface" % "0.11" % Test
      )
 
+To be able to see diff between old and new result, install meld: 
+
+    sudo apt install meld
+
 First line adds the testtoy. Second adds the needed junit library 
 and the third line adds sbt junit integration so that you 
 can run the tests with:
@@ -109,6 +162,7 @@ results are ok, you can freeze them by inputing [i]. If not,
 you can ignore the results.
 
 
+
 practicalities:
 ---------------
 
@@ -122,16 +176,31 @@ Also you want to add *_out.txt and *_out files into
 your gitignore file.
 
 
+
+more information:
+-----------------
+
+See the unit tests in src/test/java folder to see more examples
+of the the tool usage.
+
+
+
 acknowledgements:
 -----------------
 
-  Thanks for Ferenc Dosa-Racz for showing the way with his 
-  ITK (integrated testkit). 
+  Thanks for our customer for letting us (Futurice) publish 
+  this tool as it was originally developed for their project
+  and legally their IPR. 
 
-  This is not a novel idea, and you can find behavioral text
-  based comparison tools elsewhere like the texttest 
-  tool by Geoff Bache and Daniel Galdames.
+  Thanks for Ferenc Dosa-Racz for showing the way and the 
+  benefits of this approach with his ITK (integrated testkit). 
 
+  This kind of testing is also available in texttest tool  
+  developed by Geoff Bache and Daniel Galdames in: 
+
+    http://texttest.sourceforge.net/
+
+  So this kind of testing approach is not exactly a new idea. 
   This tool was created merely to provide similar kind of
   functionality in Java / JVM environment and to suit
   my individual tastes.

@@ -1,4 +1,4 @@
-package com.futurice.txttest;
+package com.futurice.testtoys;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -244,7 +244,7 @@ public class TestTool {
 			boolean freeze = (config == AUTOMATIC_FREEZE);
 			if (config == INTERACTIVE) {
 				while (true) {
-					System.out.print("diff[d], ignore[i] or freeze[f]?"); 
+					System.out.print("[d]iff, [c]ontinue or [f]reeze?"); 
 					String line = new BufferedReader(new InputStreamReader(System.in)).readLine();
 					if (line.equals("d")) {
 					    String[] params = new String [3];
@@ -255,7 +255,7 @@ public class TestTool {
 					} else if (line.equals("f")) {
 						freeze = true;
 						break;
-					} else if (line.equals("i")){
+					} else if (line.equals("c")){
 						freeze = false;
 						break;
 					}

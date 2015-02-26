@@ -1,4 +1,4 @@
-package com.futurice.txttest;
+package com.futurice.testtoys;
 
 import java.io.IOException;
 import java.io.Reader;

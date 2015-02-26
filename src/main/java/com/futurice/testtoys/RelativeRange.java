@@ -1,6 +1,4 @@
-package com.futurice.txttest;
-
-import scala.math.Numeric;
+package com.futurice.testtoys;
 
 public class RelativeRange {
 	
