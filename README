@@ -71,30 +71,59 @@ the benefits:
    * The benefit compared to traditional unit testing are:
 
        1. Greatly reduced effort and increased speed of creating tests
+
           * No precreated vectors containing right orders & results
+
           * No checking of each function result with custom comparison
-          -> You get better test coverage for less work
+
+          -> You get better test coverage faster and with less effort
 
        2. Fast comparison to old results: 
-          * If you are measuring things, without 'one right answer' 
+
+          * If you are measuring things without 'one right answer' 
             like performance, error/quality rates or orders, 
-            you can easily see the difference between old result
-            and the new one. 
+            you will immediately see, whether the new results are better
+            than the old ones. 
+
+          -> you can test things for which conventional unit tests
+             would be clumsy and ineffective.
 
        3. Greatly reduced effort in maintaining the tests
+
           * No updating of result vectors or result objects
-            Just selecte [f]reeze and you have new expected result.
+            Just select [f]reeze and you have new expected result.
+
           * This is HUGE deal, when developing software, which 
             doesn't create single correct results, but where results
             improve with every iteration. When improving results
             little by little it would be major pair to update
             parts of the unittest code, whenever results change. 
 
-       4. Self-documenting & generates 'documentation of the expected behavior'
+          -> you can maintain larger test sets cheaper
+
+       4. The tests are self-documenting and the tool create in essense
+          'formal documentation of the expected behavior'
+
           * The generated file can document itself by simply printing
-            comments on the results . 
-          * output it  and it form 
-            a natural description of the system's behavior
+            comments on the results. 
+
+          * the expectation files form a natural documentation of the system's
+            expected behavior. if you have performance tests, the expected performance 
+            will be stored in the expectation files. if you have error rates
+            or e.g. results of stemmers: the expected error rates and tokens 
+            are there too. these results are immediately available in human 
+            readable form without a need to run potentially heavy performance 
+            tests. 
+
+          -> it will improve your awareness of the system's behavior and
+             performance in the most convenient way. 
+
+   * While the tool is not perfect and the approach has its own inconveniences 
+     (e.g. links to relevant code lines are missing), my own experience with
+     this kind of testing has been hugely positive. It is extremely 
+     convenient and productive way to do testing. It allows better test coverage, 
+     and it helps building better quality and better behaving software faster.
+     It is also very convenient and easy way to do testing.
 
 
 
@@ -105,7 +134,7 @@ To install testtoys in your local repository, use:
 
     sbt publishLocal
 
-To use texttoys in your project, add following dependencies into
+To use testtoys in your project, add following dependencies into
 your sbt project:
 
     libraryDependencies ++= Seq(
