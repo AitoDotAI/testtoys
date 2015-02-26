@@ -113,7 +113,7 @@ the benefits:
             error rates or e.g. results of stemmers: the expected error rates
             and tokens are there too. these results are immediately available 
             in human readable form without a need to run potentially slow tests
-            (e.g. performance, scaling and stress tests tests may take a while). 
+            (e.g. performance, scaling and stress tests may take a while). 
 
           -> it will improve your awareness of the system's behavior and
              performance in the most convenient way. 
