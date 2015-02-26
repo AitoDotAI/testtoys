@@ -5,6 +5,7 @@ texttoys is a test tool for text-based behavioral testing.
 It can be combined with JUnit for proper IDE integration. 
 
 
+
 the code example:
 -----------------
 
@@ -52,7 +53,10 @@ result:
     1 ms. 1 errors! [d]iff, [c]ontinue or [f]reeze?
 
 If the test is run in interactive mode, the developer can 
-mark the new result as ok by refreezing it. 
+mark the new result as ok by [f]reezing it. [d]iff lets
+user to see the difference between new and old results in 
+Meld (if installed). 
+
 
 
 the benefits:
@@ -62,7 +66,7 @@ the benefits:
      of creating a unittest case is similar to printing 
      debug info with System.out.println();  
 
-   * The benefit compared to traditional unit testing is:
+   * The benefit compared to traditional unit testing are:
 
        1. Greatly reduced effort and increased speed of creating tests
           * No precreated vectors containing right orders & results
