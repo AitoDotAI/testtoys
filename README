@@ -121,7 +121,7 @@ the benefits:
    * While the tool is not perfect and the approach has its own inconveniences 
      (e.g. links to relevant code lines are missing), my own experience with
      this kind of testing has been hugely positive. It is extremely 
-     convenient and productive way to do testing. It allows better test coverage, 
+     convenient and productive way to do testing. It allows better coverage, 
      and it helps building better quality and better behaving software faster.
      It is also very convenient and easy way to do testing.
 
