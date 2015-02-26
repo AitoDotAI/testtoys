@@ -107,13 +107,13 @@ the benefits:
           * The generated file can document itself by simply printing
             comments on the results. 
 
-          * the expectation files form a natural documentation of the system's
-            expected behavior. if you have performance tests, the expected performance 
-            will be stored in the expectation files. if you have error rates
-            or e.g. results of stemmers: the expected error rates and tokens 
-            are there too. these results are immediately available in human 
-            readable form without a need to run potentially heavy performance 
-            tests. 
+          * The expectation files form a natural documentation of the system's
+            expected behavior. If you have performance tests, the expected 
+            performance will be stored in the expectation files. If you have 
+            error rates or e.g. results of stemmers: the expected error rates
+            and tokens are there too. these results are immediately available 
+            in human readable form without a need to run potentially slow tests
+            (e.g. performance, scaling and stress tests tests may take a while). 
 
           -> it will improve your awareness of the system's behavior and
              performance in the most convenient way. 
