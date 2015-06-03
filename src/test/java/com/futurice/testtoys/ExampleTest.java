@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import src.main.java.com.futurice.testtoys.TestTool;
+import com.futurice.testtoys.TestTool;
 
 public class ExampleTest {	
 	@Test
