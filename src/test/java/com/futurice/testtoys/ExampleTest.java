@@ -1,8 +1,12 @@
 package com.futurice.testtoys;
 
-import org.junit.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
+
+import org.junit.Test;
+
+import com.futurice.testtoys.TestTool;
 
 public class ExampleTest {	
 	@Test

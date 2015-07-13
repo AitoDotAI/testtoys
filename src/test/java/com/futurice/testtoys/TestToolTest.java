@@ -1,12 +1,16 @@
 package com.futurice.testtoys;
 
-import java.io.File;
+import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.junit.*;
-import static org.junit.Assert.*;
+import org.junit.Test;
+
+
+import com.futurice.testtoys.RelativeRange;
+import com.futurice.testtoys.TestTool;
 
 public class TestToolTest {
 	
