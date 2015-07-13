@@ -8,3 +8,5 @@ lazy val root = (project in file(".")).
       "com.novocode" % "junit-interface" % "0.11" % Test
     )
 )
+
+scalaVersion := "2.11.6"

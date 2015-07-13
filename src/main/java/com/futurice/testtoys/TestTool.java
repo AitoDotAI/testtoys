@@ -34,9 +34,7 @@ public class TestTool {
 	private int errorPos = -1; 
 	private String errorExp;
 	private int config;
-	
 	private long beginMs;
-	
 	private StringBuffer outline; 
 	private String expline;
 	
@@ -45,6 +43,9 @@ public class TestTool {
 	}
 	public TestTool(String path, PrintStream report) throws IOException {
 		this(new File(path), report, INTERACTIVE);
+	}
+	public TestTool(String path, int config) throws IOException {
+		this(new File(path), System.out, config);
 	}
 	public TestTool(String path, PrintStream report, int config) throws IOException {
 		this(new File(path), report, config);
@@ -77,6 +78,10 @@ public class TestTool {
 	public void close() throws IOException {
 		out.close(); 
 		exp.close(); 
+	}
+	public File fileDir() {
+		filePath.mkdir(); 
+		return filePath;
 	}
 	public File file(String filename) {
 		filePath.mkdir(); 
