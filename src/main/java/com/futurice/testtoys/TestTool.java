@@ -39,10 +39,10 @@ public class TestTool {
 	private String expline;
 	
 	public TestTool(String path) throws IOException {
-		this(new File(path), System.out, INTERACTIVE);
+		this(new File(path), System.out, System.getenv("TESTTOYS_NEVER_FREEZE") != null ? NEVER_FREEZE : INTERACTIVE);
 	}
 	public TestTool(String path, PrintStream report) throws IOException {
-		this(new File(path), report, INTERACTIVE);
+		this(new File(path), report, System.getenv("TESTTOYS_NEVER_FREEZE") != null ? NEVER_FREEZE : INTERACTIVE);
 	}
 	public TestTool(String path, int config) throws IOException {
 		this(new File(path), System.out, config);

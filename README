@@ -59,7 +59,8 @@ mark the new result as ok by [f]reezing it. [d]iff lets
 user to see the difference between new and old results in 
 Meld (if installed). 
 
-
+To run non-interactive by default (can be overridden in code),
+define the environment variable TESTTOYS_NEVER_FREEZE.
 
 the benefits:
 -------------
