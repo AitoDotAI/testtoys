@@ -135,17 +135,22 @@ public class TestTool {
 		}
 	}
 	
+	void printError(String tag, String outline, String expline) {
+		report.print(tag + outline.toString());
+
+		if (expline != null) {
+			int pad = 50 - 2 - outline.length(); 
+			for (int i = 0; i < pad; ++i) report.print(' ');
+			report.println("|" + expline.toString());
+		} else {
+			report.println();
+		}
+	}
+	
 	void lineDone() throws IOException {
 		if (!lineOk) {
 			errors++;
-			report.print("! " + outline.toString());
-			if (expline != null) {
-				int pad = 50 - 2 - outline.length(); 
-				for (int i = 0; i < pad; ++i) report.print(' ');
-				report.println("|" + expline.toString());
-			} else {
-				report.println();
-			}
+			printError("! ", outline.toString(), expline); 
 		} else {
 			report.println("  " + outline.toString());
 		}
@@ -236,6 +241,11 @@ public class TestTool {
 		if (outline.length() > 0) {
 			lineDone();
 		}
+		if (expline != null) {
+			errors++; 
+			printError("EOF", "", expline);
+		}
+		
 		out.close();
 		if (exp != null) exp.close();
 		
