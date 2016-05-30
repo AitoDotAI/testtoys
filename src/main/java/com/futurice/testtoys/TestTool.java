@@ -152,6 +152,7 @@ public class TestTool {
 	}
 	
 	void lineDone() throws IOException {
+		out.flush();
 		if (!lineOk) {
 			errors++;
 			printError("! ", outline.toString(), expline); 
