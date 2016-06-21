@@ -39,14 +39,15 @@ public class TestTool {
 	private String expline;
 	
 	public TestTool(String path) throws IOException {
-		this(new File(path), System.out,
-         System.getenv("TESTTOYS_NEVER_FREEZE") != null ? NEVER_FREEZE :
-         System.getenv("TESTTOYS_ALWAYS_FREEZE") != null ? AUTOMATIC_FREEZE : INTERACTIVE);
+		this(new File(path),
+			 System.out,
+             System.getenv("TESTTOYS_NEVER_FREEZE") != null ? NEVER_FREEZE :
+             System.getenv("TESTTOYS_ALWAYS_FREEZE") != null ? AUTOMATIC_FREEZE : INTERACTIVE);
 	}
 	public TestTool(String path, PrintStream report) throws IOException {
 		this(new File(path), report,
-         System.getenv("TESTTOYS_NEVER_FREEZE") != null ? NEVER_FREEZE :
-         System.getenv("TESTTOYS_ALWAYS_FREEZE") != null ? AUTOMATIC_FREEZE : INTERACTIVE);
+             System.getenv("TESTTOYS_NEVER_FREEZE") != null ? NEVER_FREEZE :
+             System.getenv("TESTTOYS_ALWAYS_FREEZE") != null ? AUTOMATIC_FREEZE : INTERACTIVE);
 	}
 	public TestTool(String path, int config) throws IOException {
 		this(new File(path), System.out, config);
@@ -150,7 +151,7 @@ public class TestTool {
 			report.println();
 		}
 	}
-	
+
 	void lineDone() throws IOException {
 		out.flush();
 		if (!lineOk) {
@@ -268,7 +269,7 @@ public class TestTool {
 					String line = new BufferedReader(new InputStreamReader(System.in)).readLine();
 					if (line.equals("d")) {
 					    String[] params = new String [3];
-					    params[0] = "/usr/bin/meld";
+					    params[0] = "meld";
 					    params[1] = expFile.getAbsolutePath();
 					    params[2] = outFile.getAbsolutePath();
 					    Runtime.getRuntime().exec(params);
