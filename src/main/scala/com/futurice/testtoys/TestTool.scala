@@ -19,16 +19,19 @@ object TestTool {
   val NEVER_FREEZE: Int = 2
   val UNDEFINED: String = "__UNDEFINED__"
   val EOF: String = "__EOF__"
+
+  def ms[T](f: =>T) = {
+    val before = System.currentTimeMillis()
+    val rv = f
+    (System.currentTimeMillis-before, rv)
+  }
 }
 
 class TestTool @throws[IOException]
 (val path: File, var report: PrintStream, var config: Int) {
   path.getParentFile.mkdirs
   if (path.exists) {
-    for (f <- path.listFiles) {
-      f.delete
-    }
-    path.delete
+    TestCommon.rmdir(path)
   }
   private var outFile: File = new File(path + "_out.txt")
   private var expFile: File = new File(path + "_exp.txt")
@@ -259,6 +262,11 @@ class TestTool @throws[IOException]
   }
 
   @throws[IOException]
+  def iln {
+    ignoreToken("\n")
+  }
+
+  @throws[IOException]
   def ifln(f: String, args: Any*) {
     igf(f, args)
     ignoreToken("\n")
@@ -287,14 +295,71 @@ class TestTool @throws[IOException]
   }
 
   @throws[IOException]
-  def t(file: File) {
+  def t(file: File, lines:Int = -1) {
     val r: BufferedReader = new BufferedReader(new FileReader(file))
     var l: String = null
-    while ({l = r.readLine; l != null}) {
+    var line = 0
+    while ({l = r.readLine; l != null && line != lines}) {
       tln(l)
+      line += 1
     }
     r.close
   }
+
+  def tLong[T](relRange:Double, time:Long, unit:String) {
+    val v = peekLong
+    i(f"$time $unit ")
+    v match {
+      case Some(old) =>
+        if (relRange.isPosInfinity||
+	    Math.abs(Math.log(time/old.toDouble)) < Math.log(relRange)||old==0) {
+          i(f"(was $old ms)")
+        } else {
+          t("(" +{((time*100)/old.toDouble).toInt}+ "% of old " + old + " ms)")
+        }
+      case None =>
+    }
+  }
+
+  def tDouble[T](relRange:Double, time:Double, unit:String) {
+    val v = peekDouble
+    i(f"$time%.3f $unit ")
+    v match {
+      case Some(old) =>
+        if (relRange.isPosInfinity
+	    ||Math.abs(Math.log(time/old.toDouble)) < Math.log(relRange)||old==0) {
+          i(f"(was $old%.3f $unit)")
+        } else {
+          t(f"(${((time*100)/old.toDouble).toInt}%% of old $old%.3f $unit)")
+        }
+      case None =>	
+    }
+  }
+
+  def tMs[T](relRange:Double, f : => T) : T = {
+    val (m, rv) = TestTool.ms(f)
+    tLong(relRange, m, "ms")
+    rv
+  }
+  // allow the value to be twice as big or half as small
+  def tMs[T](f: => T) : T =
+    tMs(10, f)
+
+  def tMsLn[T](f: => T) : T = {
+    val rv = tMs(10, f)
+    i("\n")
+    rv
+  }
+
+  def iMs[T](f: =>T) : T =
+    tMs(Double.PositiveInfinity, f)
+
+  def iMsLn[T](f: =>T) : T = {
+    val rv = tMs(Double.PositiveInfinity, f)
+    i("\n")
+    rv
+  }
+
 
   @throws[IOException]
   def done: Boolean = {
@@ -345,4 +410,7 @@ class TestTool @throws[IOException]
     report.println
     return ok
   }
+
+
+
 }

@@ -1,5 +1,7 @@
 package com.futurice.testtoys
 
+import java.io.File
+
 /**
   * Created by arau on 4.6.2016.
   */
@@ -18,4 +20,15 @@ object TestCommon {
     }
     return true
   }
+  def rmdir(file:File): Unit = {
+    for (f <- file.listFiles) {
+      if (f.isDirectory) {
+        rmdir(f)
+      } else {
+        f.delete
+      }
+    }
+    file.delete
+  }
+
 }
