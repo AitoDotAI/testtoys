@@ -2,7 +2,7 @@ scalaVersion := "2.11.4"
 
 crossScalaVersions := Seq("2.10.6")
 
-lazy val root = (project in file(".")).
+lazy val testtoys = (project in file(".")).
   settings(
     name := "testtoys",
     organization := "com.futurice",
