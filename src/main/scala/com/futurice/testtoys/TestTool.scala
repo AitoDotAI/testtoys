@@ -29,13 +29,15 @@ object TestTool {
 
 class TestTool @throws[IOException]
 (val path: File, var report: PrintStream, var config: Int) {
-  path.getParentFile.mkdirs
-  if (path.exists) {
-    TestCommon.rmdir(path)
-  }
   private var outFile: File = new File(path + "_out.txt")
   private var expFile: File = new File(path + "_exp.txt")
   private var filePath: File  = new File(path + "_out")
+
+  path.getParentFile.mkdirs
+  if (filePath.exists) {
+    TestCommon.rmdir(filePath)
+  }
+
   private var out = new FileWriter(outFile)
   private var exp : BufferedReader =
     if (expFile.exists()) {
