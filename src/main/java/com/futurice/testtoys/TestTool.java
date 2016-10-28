@@ -2,6 +2,7 @@ package com.futurice.testtoys;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -234,7 +236,15 @@ public class TestTool {
 		feedToken("\n"); 
 	}
 	public void t(File file) throws IOException {
-		BufferedReader r = new BufferedReader(new FileReader(file));
+		t(file, null);
+	}
+	public void t(File file, Charset charset) throws IOException {
+		BufferedReader r;
+		if (charset == null) {
+			r = new BufferedReader(new FileReader(file));
+		} else {
+			r = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset));
+		}
 		String l;
 		while ((l = r.readLine()) != null) tln(l);
 		r.close(); 
