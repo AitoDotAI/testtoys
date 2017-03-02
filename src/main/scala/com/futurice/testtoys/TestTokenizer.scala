@@ -44,8 +44,9 @@ class TestTokenizer(val reader: Reader) extends Iterator[String] {
             b.append(r.read.toChar)
           }
         }
-        else if (r.peek == '\n') {
-          b.append(r.read.toChar)
+        else if (r.peek == '\n' || r.peek == '\r') {
+          r.read
+          b.append('\n')
         }
         else if (Character.isDigit(r.peek)) {
           while (Character.isDigit(r.peek)) {
