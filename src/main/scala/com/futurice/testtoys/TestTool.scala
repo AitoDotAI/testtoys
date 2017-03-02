@@ -335,9 +335,9 @@ class TestTool @throws[IOException]
       case Some(old) =>
         if (relRange.isPosInfinity||
 	    Math.abs(Math.log(time/old.toDouble)) < Math.log(relRange)||old==0) {
-          i(f"(was $old ms)")
+          i(f"(was $old $unit)")
         } else {
-          t("(" +{((time*100)/old.toDouble).toInt}+ "% of old " + old + " ms)")
+          t("(" +{((time*100)/old.toDouble).toInt}+ "% of old " + old + s" $unit)")
         }
       case None =>
     }
