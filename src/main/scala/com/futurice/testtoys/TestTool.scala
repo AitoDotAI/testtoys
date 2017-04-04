@@ -10,8 +10,12 @@ import java.io.InputStreamReader
 import java.io.PrintStream
 import java.io.StringReader
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.temporal.{ChronoUnit, TemporalUnit}
 import java.util.Date
 import java.util.List
+
+import com.sun.org.apache.xerces.internal.parsers.CachingParserPool.SynchronizedGrammarPool
 
 object TestTool {
   val INTERACTIVE: Int = 0
@@ -25,6 +29,16 @@ object TestTool {
     val rv = f
     (System.currentTimeMillis-before, rv)
   }
+
+  def time[T](f: =>T, temporalUnit: TemporalUnit) = {
+    val before = Instant.now()
+    val rv = f
+    val after = Instant.now()
+
+    (before.until(after, temporalUnit), rv)
+  }
+
+  def us[T](f: =>T) = time(f, ChronoUnit.MICROS)
 }
 
 class TestTool @throws[IOException]
@@ -381,6 +395,34 @@ class TestTool @throws[IOException]
     i("\n")
     rv
   }
+
+  def tTime[T](relRange:Double, f : => T, temporalUnit: TemporalUnit) : T = {
+    val (t, rv) = TestTool.time(f, temporalUnit)
+    tLong(relRange, t, temporalUnit.toString)
+    rv
+  }
+
+
+  // allow the value to be twice as big or half as small
+  def tTime[T](f: => T, temporalUnit: TemporalUnit) : T =
+    tTime(10, f, temporalUnit)
+
+  def tTimeLn[T](f: => T, temporalUnit: TemporalUnit) : T = {
+    val rv = tTime(10, f, temporalUnit)
+    i("\n")
+    rv
+  }
+  def iTime[T](f: =>T, temporalUnit: TemporalUnit) : T =
+    tTime(Double.PositiveInfinity, f, temporalUnit)
+
+  def iTimeLn[T](f: =>T, temporalUnit: TemporalUnit) : T = {
+    val rv = tTime(Double.PositiveInfinity, f, temporalUnit)
+    i("\n")
+    rv
+  }
+
+  def iUsLn[T](f : => T) = iTimeLn(f, ChronoUnit.MICROS)
+  def tUsLn[T](f : => T) = tTimeLn(f, ChronoUnit.MICROS)
 
 
   @throws[IOException]
