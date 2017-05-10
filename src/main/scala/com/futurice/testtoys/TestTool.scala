@@ -1,7 +1,9 @@
 package com.futurice.testtoys
 
+import java.io.BufferedInputStream
 import java.io.BufferedReader
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.FileReader
 import java.io.FileWriter
@@ -9,6 +11,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.io.PrintStream
 import java.io.StringReader
+import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.temporal.{ChronoUnit, TemporalUnit}
@@ -39,6 +42,10 @@ object TestTool {
   }
 
   def us[T](f: =>T) = time(f, ChronoUnit.MICROS)
+
+  sealed trait FileFormat
+  case class TextFormat(charset: Charset, lines: Long) extends FileFormat
+  case object BinaryFormat extends FileFormat
 }
 
 class TestTool @throws[IOException]
@@ -46,6 +53,8 @@ class TestTool @throws[IOException]
   private var outFile: File = new File(path + "_out.txt")
   private var expFile: File = new File(path + "_exp.txt")
   private var filePath: File  = new File(path + "_out")
+
+  import TestTool.{ FileFormat, TextFormat, BinaryFormat }
 
   path.getParentFile.mkdirs
   if (filePath.exists) {
@@ -320,17 +329,30 @@ class TestTool @throws[IOException]
      t(file, None, lines)
   }
 
-  def t(file: File, charset : Option[java.nio.charset.Charset], lines:Int) = {
+  @throws[IOException]
+  def t(file: File, charset:Option[Charset], lines:Int) {
+    t(file, TextFormat(charset getOrElse Charset.defaultCharset, lines))
+  }
+
+  @throws[IOException]
+  def t(file: File, charset:Charset, lines:Int) {
+    t(file, TextFormat(charset, lines))
+  }
+
+  @throws[IOException]
+  def t(file: File, charset:Charset) {
+    t(file, TextFormat(charset, -1))
+  }
+
+  @throws[IOException]
+  def tText(file: File, format: TextFormat) {
     val r =
       new BufferedReader(
-        charset match {
-	  case None => new FileReader(file)
-	  case Some(cs) => new InputStreamReader(new java.io.FileInputStream(file), cs)
-	})
+        new InputStreamReader(new FileInputStream(file), format.charset))
     try { 
       var l: String = null
       var line = 0
-      while ({l = r.readLine; l != null && line != lines}) {
+      while ({l = r.readLine; l != null && line != format.lines}) {
         tln(l)
         line += 1
       }
@@ -339,7 +361,37 @@ class TestTool @throws[IOException]
     }
   }
 
+  @throws[IOException]
+  def tBinary(file: File) {
+    // Displays only 32 bytes per line in hexadecimal, not for large files!
+    val buf = new Array[Byte](32)
+    val is = new BufferedInputStream(new FileInputStream(file))
+    try {
+      var n = 0
+      while ({ n = is.read(buf); n > 0}) {
+        val line = if (n < buf.length) buf.take(n) else buf
+        line.iterator.grouped(4).grouped(2).zipWithIndex.foreach {
+          case (words, i) =>
+            if (i > 0) t("  ")
+            words.zipWithIndex.foreach { case (word, j) =>
+              if (j > 0) t(s" ")
+              t(word.map("%02x".format(_)).mkString)
+            }
+        }
+        tln
+      }
+    } finally {
+      is.close
+    }
+  }
 
+  @throws[IOException]
+  def t(file: File, format: FileFormat) {
+    format match {
+      case f: TextFormat => tText(file, f)
+      case BinaryFormat => tBinary(file)
+    }
+  }
 
   def tLong[T](relRange:Double, time:Long, unit:String) {
     val v = peekLong
@@ -473,7 +525,4 @@ class TestTool @throws[IOException]
     report.println
     return ok
   }
-
-
-
 }

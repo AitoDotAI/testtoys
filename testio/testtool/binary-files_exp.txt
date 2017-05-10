@@ -1,0 +1,13 @@
+tBinary(file) can be used to include binary files in the output of
+a test. When included it is shown in base-16 and looks like this:
+
+f400f9fa de69d69b  95efe29f fb618acf  dfa2b9f4 b7ffd3ca  9800006a 5972fe2b
+7fc22965 fe5a2893  f96291ef ed862b3f  fc000004 00000010  00000001 0000004a
+011b0005 00000001  00000052 01280003  00000001 00020000  87690004 00000001
+0000005a 00000000  00000048 00000001  00004398 3118a007  a28057e9 80a00132
+0185a002 0a96ddc4  05a343f6 01fea824  c03678d7 43a29012  a0911fff d9
+
+The output is not very compact and should be used for small binary
+files only. The diff is mainly useful to check whether the binary
+format of a file has changed but in simple cases it is possible to
+figure out what changed exactly.
