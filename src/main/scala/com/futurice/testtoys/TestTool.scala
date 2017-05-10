@@ -315,10 +315,9 @@ class TestTool @throws[IOException]
      t(file, None, -1)
   }
 
-
   @throws[IOException]
   def t(file: File, lines:Int) {
-     t(file, None, -1)
+     t(file, None, lines)
   }
 
   def t(file: File, charset : Option[java.nio.charset.Charset], lines:Int) = {
