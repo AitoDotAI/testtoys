@@ -40,6 +40,35 @@ class TestToolTest extends TestSuite("testtool") {
     t.tln("if the content changes, the test will break.")
   }
 
+  test("binary-files") { t =>
+    val f: File = t.file("test.bin")
+    val os = new java.io.FileOutputStream(f)
+    try {
+      os.write(Array[Byte](
+        -12, 0, -7, -6, -34, 105, -42, -101, -107, -17, -30, -97, -5, 97, -118,
+        -49, -33, -94, -71, -12, -73, -1, -45, -54, -104, 0, 0, 106, 89, 114,
+        -2, 43, 127, -62, 41, 101, -2, 90, 40, -109, -7, 98, -111, -17, -19,
+        -122, 43, 63, -4, 0, 0, 4, 0, 0, 0, 16, 0, 0, 0, 1, 0, 0, 0, 74, 1, 27,
+        0, 5, 0, 0, 0, 1, 0, 0, 0, 82, 1, 40, 0, 3, 0, 0, 0, 1, 0, 2, 0, 0,
+        -121, 105, 0, 4, 0, 0, 0, 1, 0, 0, 0, 90, 0, 0, 0, 0, 0, 0, 0, 72, 0,
+        0, 0, 1, 0, 0, 67, -104, 49, 24, -96, 7, -94, -128, 87, -23, -128, -96,
+        1, 50, 1, -123, -96, 2, 10, -106, -35, -60, 5, -93, 67, -10, 1, -2,
+        -88, 36, -64, 54, 120, -41, 67, -94, -112, 18, -96, -111, 31, -1, -39))
+    } finally {
+      os.close
+    }
+
+    t.tln("tBinary(file) can be used to include binary files in the output of")
+    t.tln("a test. When included it is shown in base-16 and looks like this:")
+    t.tln
+    t.tBinary(f)
+    t.tln
+    t.tln("The output is not very compact and should be used for small binary")
+    t.tln("files only. The diff is mainly useful to check whether the binary")
+    t.tln("format of a file has changed but in simple cases it is possible to")
+    t.tln("figure out what changed exactly.")
+  }
+
   test("peeks") { t =>
     t.tln("for performance testing we can use peekLong() facility")
     t.tln("let's measure how long sleeping 100ms takes")
