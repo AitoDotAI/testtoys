@@ -65,7 +65,6 @@ class TestTool @throws[IOException]
   private var errors: Int = 0
   private var lineOk: Boolean = true
   private var errorPos: Int = -1
-  private var errorExp: String = null
   private var outline: StringBuffer = null
   private var expline: String = null
 
@@ -124,7 +123,6 @@ class TestTool @throws[IOException]
     }
     lineOk = true
     errorPos = -1
-    errorExp = null
   }
 
   def parse(s: String): java.util.List[String] = {
@@ -221,17 +219,17 @@ class TestTool @throws[IOException]
       outline.append(t)
     }
   }
+  def fail = {
+    lineOk = false
+    if (errorPos == -1) {
+      errorPos = outline.length
+    }
+  }
 
   @throws[IOException]
   def feedToken(t: Any) {
     val e: String = read
-    if (!test(t, e)) {
-      lineOk = false
-      if (errorPos == -1) {
-        errorPos = outline.length
-        errorExp = e
-      }
-    }
+    if (!test(t, e)) fail
     out.write(t.toString)
     if (t == "\n") {
       lineDone
