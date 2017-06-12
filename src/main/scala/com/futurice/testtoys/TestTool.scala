@@ -473,9 +473,28 @@ class TestTool @throws[IOException]
   def iUsLn[T](f : => T) = iTimeLn(f, ChronoUnit.MICROS)
   def tUsLn[T](f : => T) = tTimeLn(f, ChronoUnit.MICROS)
 
+  // Extra action is of form (ok, expFile, outFile => (freeze, continue)
+
+  type Action = (Boolean, File, File)=>(Boolean, Boolean)
+  type ActionEntry = (String, String, Action)
+
+  def diffToolAction(toolCmd:String = "/usr/bin/meld",
+                     action:String = "[d]iff",
+                     command:String = "d") = {
+    (action, command,
+      (_:Boolean, expFile:File, outFile:File) => {
+        (action, command)
+        val params: Array[String] = new Array[String](3)
+        params(0) = toolCmd
+        params(1) = expFile.getAbsolutePath
+        params(2) = outFile.getAbsolutePath
+        Runtime.getRuntime.exec(params)
+        (false, true)
+    })
+  }
 
   @throws[IOException]
-  def done: Boolean = {
+  def done(extraActions:Seq[ActionEntry] = Seq(diffToolAction())): Boolean = {
     var ok: Boolean = errors == 0
     val ms: Long = System.currentTimeMillis - beginMs
     if (outline.length > 0) {
@@ -497,20 +516,21 @@ class TestTool @throws[IOException]
       if (config == TestTool.INTERACTIVE) {
         var cont = true
         while (cont) {
-          System.out.print("[d]iff, [c]ontinue or [f]reeze?")
+          System.out.print((extraActions.map(_._1) ++ Seq("[c]ontinue")).mkString(", ") +  " or [f]reeze?")
           val line: String = new BufferedReader(new InputStreamReader(System.in)).readLine
-          if (line == "d") {
-            val params: Array[String] = new Array[String](3)
-            params(0) = "/usr/bin/meld"
-            params(1) = expFile.getAbsolutePath
-            params(2) = outFile.getAbsolutePath
-            Runtime.getRuntime.exec(params)
-          } else if (line == "f") {
+          if (line == "f") {
             freeze = true
             cont = false
           } else if (line == "c") {
             freeze = false
             cont = false
+          } else {
+            extraActions.map(e => (e._2, e._3)).toMap.get(line) match{
+              case None =>
+              case Some(action) =>
+                val (f, c) = action(ok, expFile, outFile)
+                freeze = f
+                cont = c            }
           }
         }
       }

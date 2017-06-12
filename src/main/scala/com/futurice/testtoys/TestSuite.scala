@@ -12,6 +12,11 @@ import scala.collection.mutable.ArrayBuffer
 class TestSuite(val name:String) {
   type TestEntry = (String, (TestTool) => Unit)
 
+  val Fail = 0
+  val Ok = 1
+  val Quit = 2
+  type Result = Int
+
   private var tests = new ArrayBuffer[TestEntry]
 
   def test(name: String) (test: (TestTool) => Unit) {
@@ -20,30 +25,56 @@ class TestSuite(val name:String) {
 
   @throws[IOException]
   def run(selection: String, rootPath:File, config: Int) = {
-    val selected: Seq[TestEntry] =
-      if (selection.isEmpty) {
-        tests
-      } else {
-        selection.split(",").flatMap { n =>
-          tests.find(_._1 == n)
-        }
-      }
-
     val path = new File(rootPath, name)
 
-    selected.map { e =>
-      val t: TestTool = new TestTool(new File(path, e._1), System.out, config)
-      try {
-        e._2(t)
-      } catch {
-        case x: Exception => {
-          val w: StringWriter = new StringWriter
-          x.printStackTrace(new PrintWriter(w))
-          t.t(w.toString)
-          w.close
-        }
+    def runTest(e:TestEntry ) = {
+      val tt: TestTool = new TestTool(new File(path, e._1), System.out, config)
+
+      e._2(tt)
+
+      var quit = false
+      var res = tt.done(Seq(tt.diffToolAction(),("[q]uit", "q", (_, _, _) => {
+        quit = true
+        (false, false)
+      })))
+      (quit, res) match {
+        case (true, _) => Quit
+        case (false, true) => Ok
+        case (false, false) => Fail
       }
-      t.done
-    }.fold(true)(_ && _)
+    }
+
+    def testOps =
+      tests.map( t =>
+        (t._1, () => runTest(t)))
+
+
+    def ops : Seq[(String, () => Int)] = {
+      testOps ++
+        Array(("-l", { () =>
+          testOps.foreach { t =>
+            System.out.println(t._1)
+          }
+          Ok
+        }))
+    }
+    val selected =
+      if (selection.size == 0) {
+        testOps
+      } else {
+        ops.filter{ case (name, op) => selection.contains(name) }
+      }
+
+    val s = selected.iterator
+    var cont = true
+    var ok = true
+    while (cont && s.hasNext) {
+      s.next._2() match {
+        case Ok =>
+        case Fail => ok = false
+        case Quit => ok = false; cont = false
+      }
+    }
+    ok
   }
 }
