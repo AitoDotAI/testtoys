@@ -4,7 +4,7 @@ object Tests {
   def main(args:Array[String]): Unit = {
     TestRunner(
       "testio",
-      Seq( new ExampleTest, new TestToolTest))
+      Seq( new ExampleTest, new PathTest, new TestToolTest))
       .exec(args)
   }
 }
