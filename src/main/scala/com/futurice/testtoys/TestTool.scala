@@ -212,9 +212,13 @@ class TestTool @throws[IOException]
   }
 
   def test(t: Any, e: String): Boolean = {
-    if (e eq TestTool.UNDEFINED) return true
-    if (e == null) return false
-    return t == e
+    (t, e) match {
+      case (_,  TestTool.UNDEFINED) => return true
+      case (_,  null) => return false
+      case (t:Double,e) => t - e.toDouble < 0.0000001
+      case (t:String, e:String) => t == e
+      case (t, e) => t.toString == e
+    }
   }
 
   @throws[IOException]
