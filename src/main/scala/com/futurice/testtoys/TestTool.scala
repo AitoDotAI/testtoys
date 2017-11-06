@@ -482,7 +482,7 @@ class TestTool @throws[IOException]
   type Action = (Boolean, File, File)=>(Boolean, Boolean)
   type ActionEntry = (String, String, Action)
 
-  def diffToolAction(toolCmd:String = "/usr/bin/meld",
+  def diffToolAction(toolCmd:String = "meld",
                      action:String = "[d]iff",
                      command:String = "d") = {
     (action, command,
