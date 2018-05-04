@@ -62,19 +62,24 @@ class TestSuite(val name:String) {
       if (selection.size == 0) {
         testOps
       } else {
-        ops.filter{ case (name, op) => name.matches(selection) }
+        ops.filter{ case (name, op) => name == selection }
       }
 
-    val s = selected.iterator
-    var cont = true
-    var ok = true
-    while (cont && s.hasNext) {
-      s.next._2() match {
-        case Ok =>
-        case Fail => ok = false
-        case Quit => ok = false; cont = false
+    if (selected.size == 0 && selection.trim.size > 0) {
+      System.out.println(f"test suite $name does not have $selection")
+      false
+    } else {
+      val s = selected.iterator
+      var cont = true
+      var ok = true
+      while (cont && s.hasNext) {
+        s.next._2() match {
+          case Ok =>
+          case Fail => ok = false
+          case Quit => ok = false; cont = false
+        }
       }
+      ok
     }
-    ok
   }
 }

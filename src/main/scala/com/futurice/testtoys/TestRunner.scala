@@ -64,15 +64,14 @@ class TestRunner(rootPath:String, tests:Seq[TestSuite]) {
         tests.map(t => (t, ""))
       } else {
         selection.flatMap { s =>
-          val (name, test) : (String, String) =
-            s.lastIndexOf('/') match {
-              case -1 => (s, "")
-              case i => (s.substring(0, i), s.substring(i+1))
+          val path = s.split('/')
+          val t : Option[TestSuite] =
+            tests.find { e =>
+              val epath = e.name.split('/')
+              epath.startsWith(path) || path.startsWith(epath)
             }
-
-          val t : Option[TestSuite] = tests.find(_.name == name)
-          if (t.isEmpty) println(name + " not found")
-          t.map(e => (e, test)) : Option[(TestSuite, String)]
+          if (t.isEmpty) println(s + " not found")
+          t.map(e => (e, path.view(e.name.split('/').size, path.size).toSeq.mkString("/"))) : Option[(TestSuite, String)]
         }
       }
     var ok = true
