@@ -18,7 +18,7 @@ class TestRunner(rootPath:String, tests:Seq[TestSuite]) {
     println()
     println("  -i    interactive mode")
     println("  -f    automatic freeze")
-    println("  -h    never freeze")
+    println("  -n    never freeze")
     println("  -l    list tests")
     println()
 
