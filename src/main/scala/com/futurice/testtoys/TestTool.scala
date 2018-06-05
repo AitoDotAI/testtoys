@@ -24,6 +24,7 @@ object TestTool {
   val INTERACTIVE: Int = 0
   val AUTOMATIC_FREEZE: Int = 1
   val NEVER_FREEZE: Int = 2
+  val FAIL_ON_ERROR: Int = 3
   val UNDEFINED: String = "__UNDEFINED__"
   val EOF: String = "__EOF__"
 
@@ -46,6 +47,13 @@ object TestTool {
   sealed trait FileFormat
   case class TextFormat(charset: Charset, lines: Long) extends FileFormat
   case object BinaryFormat extends FileFormat
+
+  def parseTestToysMode(): Int = {
+    if (System.getenv("TESTTOYS_FAIL_ON_ERROR") != null) TestTool.FAIL_ON_ERROR
+    else if (System.getenv("TESTTOYS_NEVER_FREEZE") != null) TestTool.NEVER_FREEZE
+    else if (System.getenv("TESTTOYS_ALWAYS_FREEZE") != null) TestTool.AUTOMATIC_FREEZE
+    else TestTool.INTERACTIVE
+  }
 }
 
 class TestTool @throws[IOException]
@@ -82,16 +90,13 @@ class TestTool @throws[IOException]
   prepareLine
   report.println("running " + path + "...\n")
 
+
   def this(path: String) {
-    this(new File(path), System.out, if (System.getenv("TESTTOYS_NEVER_FREEZE") != null) TestTool.NEVER_FREEZE
-    else if (System.getenv("TESTTOYS_ALWAYS_FREEZE") != null) TestTool.AUTOMATIC_FREEZE
-    else TestTool.INTERACTIVE)
+    this(new File(path), System.out, TestTool.parseTestToysMode())
   }
 
   def this(path: String, report: PrintStream) {
-    this(new File(path), report, if (System.getenv("TESTTOYS_NEVER_FREEZE") != null) TestTool.NEVER_FREEZE
-    else if (System.getenv("TESTTOYS_ALWAYS_FREEZE") != null) TestTool.AUTOMATIC_FREEZE
-    else TestTool.INTERACTIVE)
+    this(new File(path), report, TestTool.parseTestToysMode())
   }
 
   def this(path: String, config: Int) {
@@ -519,7 +524,9 @@ class TestTool @throws[IOException]
     }
     if (exp == null || errors > 0) {
       var freeze: Boolean = (config == TestTool.AUTOMATIC_FREEZE)
-      if (config == TestTool.INTERACTIVE) {
+      if (config == TestTool.FAIL_ON_ERROR) {
+        throw new RuntimeException(s"Test failed in TestTool. TestTool config set to fail on errors (expFile: ${expFile.getAbsolutePath} => outFile: ${outFile.getAbsolutePath})")
+      } else if (config == TestTool.INTERACTIVE) {
         var cont = true
         var counter = 0
         while (cont) {
