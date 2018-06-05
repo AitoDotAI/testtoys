@@ -54,6 +54,8 @@ class TestTool @throws[IOException]
   private var expFile: File = new File(path + "_exp.txt")
   private var filePath: File  = new File(path + "_out")
 
+  private val maxRetriesCount = 20
+
   import TestTool.{ FileFormat, TextFormat, BinaryFormat }
 
   path.getParentFile.mkdirs
@@ -519,7 +521,12 @@ class TestTool @throws[IOException]
       var freeze: Boolean = (config == TestTool.AUTOMATIC_FREEZE)
       if (config == TestTool.INTERACTIVE) {
         var cont = true
+        var counter = 0
         while (cont) {
+          if (counter > maxRetriesCount) {
+            throw new IllegalStateException(s"Exceeded the max retries count '${maxRetriesCount}' in ${this.getClass.toString}")
+          }
+
           System.out.print((extraActions.map(_._1) ++ Seq("[c]ontinue")).mkString(", ") +  " or [f]reeze?")
           val line: String = new BufferedReader(new InputStreamReader(System.in)).readLine
           if (line == "f") {
@@ -529,12 +536,15 @@ class TestTool @throws[IOException]
             freeze = false
             cont = false
           } else {
-            extraActions.map(e => (e._2, e._3)).toMap.get(line) match{
-              case None =>
+            extraActions.map(e => (e._2, e._3)).toMap.get(line) match {
+              case None => {
+                counter += 1
+              }
               case Some(action) =>
                 val (f, c) = action(ok, expFile, outFile)
                 freeze = f
-                cont = c            }
+                cont = c
+            }
           }
         }
       }
