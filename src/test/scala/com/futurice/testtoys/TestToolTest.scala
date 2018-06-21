@@ -103,16 +103,16 @@ class TestToolTest extends TestSuite("testtool") {
 
   test("feed") { t =>
     t.tln("feedToken(object) can be used to do more specific comparisons, e.g:\n")
-    t.tln("t.feedToken(RelativeRange(100, 1.10)) matches numeric range 91-110")
+    t.tln("t.tLong(100, 1.10) matches numeric range 91-110")
     t.t("feeding ")
     var old = t.peekLong
-    t.feedToken(new RelativeRange(100, 1.1))
-    t.iln("\n  compared to " + old.getOrElse("(none)") + "\n")
-    t.tln("t.feedToken(RelativeRange(100, 2.)) matches numeric range 50-200")
+    t.tLongLn(100, "",  1.1)
+    t.iln("  compared to " + old.getOrElse("(none)") + "\n")
+    t.tln("t.tLong(100, 2.) matches numeric range 50-200")
     t.t("feeding ")
     old = t.peekLong
-    t.feedToken(new RelativeRange(100, 2.0))
-    t.iln("\n  compared to " + old.getOrElse("(none)"))
+    t.tLongLn(100, "",  2.0)
+    t.iln("  compared to " + old.getOrElse("(none)"))
     t.tln("\nthe comparison object need to fullfil equals() so that it reads string")
     t.tln("and toString() so that it can be printed in output")
   }

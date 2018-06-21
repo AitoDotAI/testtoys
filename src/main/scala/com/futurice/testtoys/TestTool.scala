@@ -229,7 +229,7 @@ class TestTool @throws[IOException]
   }
 
   @throws[IOException]
-  def ignoreToken(t: Any) {
+  def ignoreToken(t: Any): TestTool = {
     read
     out.write(t.toString)
     if (t == "\n") {
@@ -238,16 +238,18 @@ class TestTool @throws[IOException]
     else {
       outline.append(t)
     }
+    this
   }
-  def fail = {
+  def fail : TestTool = {
     lineOk = false
     if (errorPos == -1) {
       errorPos = outline.length
     }
+    this
   }
 
   @throws[IOException]
-  def feedToken(t: Any) {
+  def feedToken(t: Any): TestTool =  {
     val e: String = read
     if (!test(t, e)) fail
     out.write(t.toString)
@@ -257,6 +259,7 @@ class TestTool @throws[IOException]
     else {
       outline.append(t)
     }
+    this
   }
 
   def pos: Int = {
@@ -264,97 +267,104 @@ class TestTool @throws[IOException]
   }
 
   @throws[IOException]
-  def t(s: String) {
+  def t(s: String) : TestTool = {
     import scala.collection.JavaConversions._
     for (t <- parse(s)) {
       feedToken(t)
     }
+    this
   }
 
   @throws[IOException]
-  def i(t: Any) {
+  def i(t: Any) : TestTool = {
     ignoreToken(t)
   }
 
   @throws[IOException]
-  def i(s: String) {
+  def i(s: String) : TestTool = {
     import scala.collection.JavaConversions._
     for (t <- parse(s)) {
       ignoreToken(t)
     }
+    this
   }
 
   @throws[IOException]
-  def igf(f: String, args: Any*) {
+  def igf(f: String, args: Any*): TestTool =  {
     i(String.format(f, args))
   }
 
   @throws[IOException]
-  def iln(s: String) {
+  def iln(s: String) : TestTool = {
     i(s)
     ignoreToken("\n")
   }
 
   @throws[IOException]
-  def iln {
+  def iln : TestTool = {
     ignoreToken("\n")
   }
 
   @throws[IOException]
-  def ifln(f: String, args: Any*) {
+  def ifln(f: String, args: Any*): TestTool =  {
     igf(f, args)
     ignoreToken("\n")
   }
 
   @throws[IOException]
-  def tln(s: String) {
+  def tln(s: String) : TestTool = {
     t(s)
     feedToken("\n")
   }
 
   @throws[IOException]
-  def tf(s: String, args: Any*) {
+  def tf(s: String, args: Any*): TestTool =  {
     t(s.format(args:_*))
   }
 
   @throws[IOException]
-  def tfln(s: String, args: Any*) {
+  def tfln(s: String, args: Any*) : TestTool = {
     tf(s, args:_*)
     feedToken("\n")
   }
 
   @throws[IOException]
-  def tln {
+  def tln : TestTool = {
     feedToken("\n")
   }
 
   @throws[IOException]
-  def t(file: File) {
+  def t(file: File) : TestTool = {
      t(file, None, -1)
+    this
   }
 
   @throws[IOException]
-  def t(file: File, lines:Int) {
+  def t(file: File, lines:Int): TestTool =  {
      t(file, None, lines)
+    this
   }
 
   @throws[IOException]
-  def t(file: File, charset:Option[Charset], lines:Int) {
+  def t(file: File, charset:Option[Charset], lines:Int): TestTool =  {
     t(file, TextFormat(charset getOrElse Charset.defaultCharset, lines))
+    this
   }
 
   @throws[IOException]
-  def t(file: File, charset:Charset, lines:Int) {
+  def t(file: File, charset:Charset, lines:Int): TestTool =  {
     t(file, TextFormat(charset, lines))
+    this
   }
 
   @throws[IOException]
-  def t(file: File, charset:Charset) {
+  def t(file: File, charset:Charset): TestTool =  {
     t(file, TextFormat(charset, -1))
+    this
   }
 
   @throws[IOException]
-  def tText(file: File, format: TextFormat) {
+  def tText(file: File, format: TextFormat): TestTool =  {
     val r =
       new BufferedReader(
         new InputStreamReader(new FileInputStream(file), format.charset))
@@ -368,10 +378,11 @@ class TestTool @throws[IOException]
     } finally {
       r.close
     }
+    this
   }
 
   @throws[IOException]
-  def tBinary(file: File) {
+  def tBinary(file: File): TestTool =  {
     // Displays only 32 bytes per line in hexadecimal, not for large files!
     val buf = new Array[Byte](32)
     val is = new BufferedInputStream(new FileInputStream(file))
@@ -392,32 +403,45 @@ class TestTool @throws[IOException]
     } finally {
       is.close
     }
+    this
   }
 
   @throws[IOException]
-  def t(file: File, format: FileFormat) {
+  def t(file: File, format: FileFormat): TestTool =  {
     format match {
       case f: TextFormat => tText(file, f)
       case BinaryFormat => tBinary(file)
     }
+    this
   }
 
-  def tLong[T](relRange:Double, time:Long, unit:String) {
+  def tLong(time:Long, unit:String = "", relRange:Double = 10.0): TestTool = {
     val v = peekLong
-    i(f"$time $unit ")
+    val postfix = unit match {
+      case "" => ""
+      case v => " " + v
+    }
+    i(f"$time$postfix ")
     v match {
       case Some(old) =>
         if (relRange.isPosInfinity||
 	    Math.abs(Math.log(time/old.toDouble)) < Math.log(relRange)||old==0) {
-          i(f"(was $old $unit)")
+          i(f"(was $old$postfix)")
         } else {
-          t("(" +{((time*100)/old.toDouble).toInt}+ "% of old " + old + s" $unit)")
+          t(f"(${((time*100)/old.toDouble).toInt}%% of old $old$postfix)")
         }
       case None =>
     }
+    this
   }
 
-  def tDouble[T](relRange:Double, time:Double, unit:String) {
+  def tLongLn(time:Long, unit:String = "", relRange:Double = 10.0): TestTool = {
+    tLong(time, unit, relRange)
+    ignoreToken("\n")
+  }
+
+
+  def tDouble(time:Double, unit:String = "", relRange:Double = 10.0) : TestTool = {
     val v = peekDouble
     i(f"$time%.3f $unit ")
     v match {
@@ -430,11 +454,17 @@ class TestTool @throws[IOException]
         }
       case None =>	
     }
+    this
+  }
+
+  def tDoubleLn(time:Double, unit:String = "", relRange:Double = 10.0): TestTool = {
+    tDouble(time, unit, relRange)
+    ignoreToken("\n")
   }
 
   def tMs[T](relRange:Double, f : => T) : T = {
     val (m, rv) = TestTool.ms(f)
-    tLong(relRange, m, "ms")
+    tLong(m, "ms", relRange)
     rv
   }
   // allow the value to be twice as big or half as small
@@ -456,33 +486,33 @@ class TestTool @throws[IOException]
     rv
   }
 
-  def tTime[T](relRange:Double, f : => T, temporalUnit: TemporalUnit) : T = {
+  def tTime[T](temporalUnit: TemporalUnit, relRange:Double)(f : => T) : T = {
     val (t, rv) = TestTool.time(f, temporalUnit)
-    tLong(relRange, t, temporalUnit.toString)
+    tLong(t, temporalUnit.toString, relRange)
     rv
   }
 
 
   // allow the value to be twice as big or half as small
-  def tTime[T](f: => T, temporalUnit: TemporalUnit) : T =
-    tTime(10, f, temporalUnit)
+  def tTime[T](temporalUnit: TemporalUnit)(f: => T) : T =
+    tTime(temporalUnit, 10)(f)
 
-  def tTimeLn[T](f: => T, temporalUnit: TemporalUnit) : T = {
-    val rv = tTime(10, f, temporalUnit)
+  def tTimeLn[T](temporalUnit: TemporalUnit)(f: => T)  : T = {
+    val rv = tTime(temporalUnit, 10)(f)
     i("\n")
     rv
   }
-  def iTime[T](f: =>T, temporalUnit: TemporalUnit) : T =
-    tTime(Double.PositiveInfinity, f, temporalUnit)
+  def iTime[T](temporalUnit: TemporalUnit)(f: =>T) : T =
+    tTime(temporalUnit, Double.PositiveInfinity)(f)
 
-  def iTimeLn[T](f: =>T, temporalUnit: TemporalUnit) : T = {
-    val rv = tTime(Double.PositiveInfinity, f, temporalUnit)
+  def iTimeLn[T](temporalUnit: TemporalUnit)(f: =>T) : T = {
+    val rv = tTime(temporalUnit, Double.PositiveInfinity)(f)
     i("\n")
     rv
   }
 
-  def iUsLn[T](f : => T) = iTimeLn(f, ChronoUnit.MICROS)
-  def tUsLn[T](f : => T) = tTimeLn(f, ChronoUnit.MICROS)
+  def iUsLn[T](f : => T) = iTimeLn(ChronoUnit.MICROS)(f)
+  def tUsLn[T](f : => T) = tTimeLn(ChronoUnit.MICROS)(f)
 
   // Extra action is of form (ok, expFile, outFile => (freeze, continue)
 
