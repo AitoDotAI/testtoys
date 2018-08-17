@@ -54,6 +54,14 @@ object TestTool {
     else if (System.getenv("TESTTOYS_ALWAYS_FREEZE") != null) TestTool.AUTOMATIC_FREEZE
     else TestTool.INTERACTIVE
   }
+
+  def diffTool(): Option[Seq[String]] = {
+    Option(System.getenv("TESTTOYS_DIFF_TOOL")) match {
+      case Some("idea") => Some(Seq("idea", "diff"))
+      case _ => None
+    }
+  }
+
 }
 
 class TestTool @throws[IOException]
@@ -525,11 +533,17 @@ class TestTool @throws[IOException]
     (action, command,
       (_:Boolean, expFile:File, outFile:File) => {
         (action, command)
-        val params: Array[String] = new Array[String](3)
-        params(0) = toolCmd
-        params(1) = expFile.getAbsolutePath
-        params(2) = outFile.getAbsolutePath
-        Runtime.getRuntime.exec(params)
+
+        val params: Seq[String] = TestTool.diffTool() match {
+          case Some(s) => s
+          case None => Seq(toolCmd)
+        }
+
+        val exec = params :+
+          expFile.getAbsolutePath :+
+          outFile.getAbsolutePath
+
+        Runtime.getRuntime.exec(exec.toArray)
         (false, true)
     })
   }
