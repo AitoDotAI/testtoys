@@ -1,6 +1,6 @@
 scalaVersion := "2.11.4"
 
-crossScalaVersions := Seq("2.10.6")
+crossScalaVersions := Seq("2.12.6")
 
 lazy val testtoys = (project in file(".")).
   settings(
