@@ -16,6 +16,15 @@ class TestToolTest extends TestSuite("testtool") {
     t.tln("the nice thing in the test tool is that it's self documenting")
   }
 
+  test("tokens") {t =>
+    val token = t.peek
+    t.tln("\"quoted string\" is treated as single token")
+    t.tln("the token was '" + token + "'")
+    val token2 = t.peek
+    t.tln("(foo bar) is treated as a single token")
+    t.tln("the token was '" + token2 + "'")
+  }
+
   test("files") { t =>
     t.tln("file(filename) can be used to get names for files in test directory")
     t.tln("each test case has its very own directory, where file are written.")

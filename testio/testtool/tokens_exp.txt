@@ -1,0 +1,4 @@
+"quoted string" is treated as single token
+the token was '"quoted string"'
+(foo bar) is treated as a single token
+the token was '(foo bar)'

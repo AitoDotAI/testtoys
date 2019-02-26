@@ -137,14 +137,17 @@ class TestTokenizer(val reader: Reader) extends Tokenizer {
           b.append('\n')
         }
         else if (r.peek == '"') {
+          b.append(r.read.toChar)
           while (r.peek != -1 && r.peek != '\n' && r.peek != '\r' && r.peek != '"') {
             b.append(r.read.toChar)
           }
+          if (r.peek == '"') b.append(r.read.toChar)
         }
         else if (r.peek == '(') {
           while (r.peek != -1 && r.peek != '\n' && r.peek != '\r' && r.peek != ')') {
             b.append(r.read.toChar)
           }
+          if (r.peek == ')') b.append(r.read.toChar)
         }
         else if (Character.isDigit(r.peek)) {
           while (Character.isDigit(r.peek)) {
