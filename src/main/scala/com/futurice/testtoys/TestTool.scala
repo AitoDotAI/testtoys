@@ -1,16 +1,6 @@
 package com.futurice.testtoys
 
-import java.io.BufferedInputStream
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.FileReader
-import java.io.FileWriter
-import java.io.IOException
-import java.io.InputStreamReader
-import java.io.PrintStream
-import java.io.StringReader
+import java.io._
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -88,7 +78,7 @@ class TestTool @throws[IOException]
     }
   private var beginMs = System.currentTimeMillis
 
-  private var expl: TestTokenizer = null
+  private var expl: Tokenizer = null
   private var errors: Int = 0
   private var lineOk: Boolean = true
   private var errorPos: Int = -1
@@ -142,15 +132,19 @@ class TestTool @throws[IOException]
     if (exp != null) {
       expline = exp.readLine
       if (expline != null) {
-        expl = new TestTokenizer(new StringReader(expline + "\n"))
+        expl = tokenizer(new StringReader(expline + "\n"))
       }
     }
     lineOk = true
     errorPos = -1
   }
 
+  def tokenizer(reader:Reader) = {
+    new TestTokenizer(reader)
+  }
+
   def parse(s: String): java.util.List[String] = {
-    return TestTokenizer.split(s)
+    return Tokenizer.splitWith(s, tokenizer(_))
   }
 
   def isExp: Boolean = {
