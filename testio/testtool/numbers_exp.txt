@@ -1,0 +1,22 @@
+running testio/testtool/numbers_out/meta...
+
+  number is now 
+  1.000 units 
+
+0 ms. frozen.
+
+
+running testio/testtool/numbers_out/meta...
+
+  number is now 
+  1.500 units (was 1.000 units)
+
+0 ms. 
+
+running testio/testtool/numbers_out/meta...
+
+  number is now 
+! 2.500 units (250% of old 1.000 units)           |1.000 units 
+
+0 ms. 1 errors! 
+
