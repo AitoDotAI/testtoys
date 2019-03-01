@@ -1,0 +1,36 @@
+running the test tool inside the test tool to see the behavior:
+
+running testio/testtool/failures_out/meta...
+
+  here value 'true' is tested
+  here value 'true' is just printed
+! here value 'true' is reported as ERROR
+  asserting value 'true'..ok
+  same assertion with macro:
+  asserting 'value'..ok [TestToolTest.scala:88]
+
+4 ms. 1 errors! frozen.
+
+
+running testio/testtool/failures_out/meta...
+
+  here value 'true' is tested
+  here value 'true' is just printed
+! here value 'true' is reported as ERROR          |here value 'true' is reported as ERROR
+  asserting value 'true'..ok
+  same assertion with macro:
+  asserting 'value'..ok [TestToolTest.scala:88]
+
+1 ms. 1 errors! 
+
+running testio/testtool/failures_out/meta...
+
+! here value 'false' is tested                    |here value 'true' is tested
+  here value 'false' is just printed
+! here value 'false' is reported as ERROR         |here value 'true' is reported as ERROR
+! asserting value 'false'..FAILED!                |asserting value 'true'..ok
+  same assertion with macro:
+! asserting 'value'..FAILED! [TestToolTest.scala:88]|asserting 'value'..ok [TestToolTest.scala:88]
+
+1 ms. 4 errors! 
+

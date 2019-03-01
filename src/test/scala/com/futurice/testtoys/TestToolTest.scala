@@ -1,12 +1,48 @@
 package com.futurice.testtoys
 
 import org.junit.Assert.assertTrue
-import java.io.File
-import java.io.FileWriter
-import java.io.IOException
+import java.io._
+
 import org.junit.Test
 
 class TestToolTest extends TestSuite("testtool") {
+
+  def tTestFile(t:TestTool, file:File) = {
+    val r =
+      new BufferedReader(
+        new InputStreamReader(new FileInputStream(file)))
+    try {
+      var l: String = null
+      var line = 0
+      while ({l = r.readLine; l != null}) {
+        if (l.startsWith("  ") || l.startsWith("! ")) {
+          t.tln(l)
+        } else {
+          t.iln(l)
+        }
+        line += 1
+      }
+    } finally {
+      r.close
+    }
+  }
+
+  def metaTest(t:TestTool, name:String, config:Int)(f : TestTool => Unit) = {
+    val log = t.file(f"result.out")
+    val out = new PrintStream(new FileOutputStream(log))
+    try {
+      val t2 = new TestTool(t.file(name), out, config)
+      try {
+        f(t2)
+      } finally {
+        t2.done()
+      }
+    } finally {
+      out.close()
+    }
+    tTestFile(t, log)
+    t.tln
+  }
 
   test("basics") { t =>
     t.tln("line printed with tln(string) needs to remain as it is")
@@ -38,6 +74,52 @@ class TestToolTest extends TestSuite("testtool") {
     t.t(f)
     t.tln
     t.tln("if the content changes, the test will break.")
+  }
+
+  test("failures") { t =>
+    import TestTool._
+
+    def runTest(t:TestTool, value:Boolean) = {
+      t.tln(f"here value '$value' is tested")
+      t.iln(f"here value '$value' is just printed")
+      t.eln(f"here value '$value' is reported as ERROR")
+      t.t(f"asserting value '$value'..").assertln(value)
+      t.tln("same assertion with macro:")
+      assert(t, value)
+    }
+
+    t.tln("running the test tool inside the test tool to see the behavior:")
+    t.tln
+
+    metaTest(t, "meta", TestTool.AUTOMATIC_FREEZE) { t =>
+      runTest(t, true)
+    }
+
+    metaTest(t, "meta", TestTool.NEVER_FREEZE) { t =>
+      runTest(t, true)
+    }
+
+    metaTest(t, "meta", TestTool.NEVER_FREEZE) { t =>
+      runTest(t, false)
+    }
+  }
+
+  test("numbers") { t =>
+
+    t.tln("running the test tool inside the test tool to see the behavior:")
+    t.tln
+
+    metaTest(t, "meta", TestTool.AUTOMATIC_FREEZE) { t =>
+      t.tln("number is now ").tDoubleLn(1.0, "units", 2.0)
+    }
+
+    metaTest(t, "meta", TestTool.NEVER_FREEZE) { t =>
+      t.tln("number is now ").tDoubleLn(1.5, "units", 2.0)
+    }
+
+    metaTest(t, "meta", TestTool.NEVER_FREEZE) { t =>
+      t.tln("number is now ").tDoubleLn(2.5, "units", 2.0)
+    }
   }
 
   test("binary-files") { t =>

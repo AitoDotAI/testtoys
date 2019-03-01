@@ -19,6 +19,8 @@ import java.util.Date
 import java.util.List
 
 import com.sun.org.apache.xerces.internal.parsers.CachingParserPool.SynchronizedGrammarPool
+import scala.language.experimental.macros
+import scala.reflect.macros.Context
 
 object TestTool {
   val INTERACTIVE: Int = 0
@@ -62,13 +64,27 @@ object TestTool {
     }
   }
 
+  def assertImpl(c: Context)(t:c.Expr[TestTool], cond: c.Expr[Boolean]): c.Expr[Unit] = {
+    import c.universe._
+    val expr = cond.tree.toString()
+    val pos = c.macroApplication.pos
+    val exprStr = c.Expr[String](Literal(Constant(expr)))
+    val posStr = c.Expr[String](Literal(Constant(s"${pos.source.file.name + ":" + pos.line}")))
+
+    reify({
+      t.splice.t("asserting '" + exprStr.splice + "'..").assert(cond.splice).iln(" [" + posStr.splice + "]")
+    })
+  }
+
+  def assert(t:TestTool, cond:Boolean) = macro assertImpl
+
 }
 
 class TestTool @throws[IOException]
 (val path: File, var report: PrintStream, var config: Int) {
-  private var outFile: File = new File(path + "_out.txt")
-  private var expFile: File = new File(path + "_exp.txt")
-  private var filePath: File  = new File(path + "_out")
+  private val outFile: File = new File(path + "_out.txt")
+  private val expFile: File = new File(path + "_exp.txt")
+  private val filePath: File  = new File(path + "_out")
 
   private val maxRetriesCount = 20
 
@@ -79,14 +95,14 @@ class TestTool @throws[IOException]
     TestCommon.rmdir(filePath)
   }
 
-  private var out = new FileWriter(outFile)
-  private var exp : BufferedReader =
+  private val out = new FileWriter(outFile)
+  private val exp : BufferedReader =
     if (expFile.exists()) {
       new BufferedReader(new FileReader(expFile))
     } else {
       null
     }
-  private var beginMs = System.currentTimeMillis
+  private val beginMs = System.currentTimeMillis
 
   private var expl: TestTokenizer = null
   private var errors: Int = 0
@@ -274,20 +290,46 @@ class TestTool @throws[IOException]
     return outline.length
   }
 
-  @throws[IOException]
-  def t(s: String) : TestTool = {
-    import scala.collection.JavaConversions._
-    for (t <- parse(s)) {
-      feedToken(t)
+  def assert(cond:Boolean) = {
+    if (!cond) {
+      e("FAILED!")
+    } else {
+      i("ok")
     }
-    this
   }
 
+  def assertln(cond:Boolean) = {
+    assert(cond)
+    iln
+  }
+
+  /** error: always fail this line  */
+  def e(str:String) = {
+    fail
+    i(str)
+  }
+
+  def error(str:String) = e(str)
+
+  /** error: always fail this line  */
+  def eln(str:String) = {
+    fail
+    iln(str)
+  }
+
+  def errorln(str:String) = eln(str)
+
+  /**
+    * Print/ignore a token
+    */
   @throws[IOException]
   def i(t: Any) : TestTool = {
     ignoreToken(t)
   }
 
+  /**
+    * Print a comment / ignore this line in testing
+    */
   @throws[IOException]
   def i(s: String) : TestTool = {
     import scala.collection.JavaConversions._
@@ -317,6 +359,19 @@ class TestTool @throws[IOException]
   def ifln(f: String, args: Any*): TestTool =  {
     igf(f, args)
     ignoreToken("\n")
+  }
+
+
+  /**
+    * Test this line
+    */
+  @throws[IOException]
+  def t(s: String) : TestTool = {
+    import scala.collection.JavaConversions._
+    for (t <- parse(s)) {
+      feedToken(t)
+    }
+    this
   }
 
   @throws[IOException]
@@ -547,6 +602,7 @@ class TestTool @throws[IOException]
         (false, true)
     })
   }
+
 
   @throws[IOException]
   def done(extraActions:Seq[ActionEntry] = Seq(diffToolAction())): Boolean = {
