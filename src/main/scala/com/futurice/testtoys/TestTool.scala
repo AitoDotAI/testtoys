@@ -8,7 +8,6 @@ import java.time.temporal.{ChronoUnit, TemporalUnit}
 import java.util.Date
 import java.util.List
 
-import com.sun.org.apache.xerces.internal.parsers.CachingParserPool.SynchronizedGrammarPool
 import scala.language.experimental.macros
 import scala.reflect.macros.Context
 
@@ -53,7 +52,6 @@ object TestTool {
       case _ => None
     }
   }
-
   def assertImpl(c: Context)(t:c.Expr[TestTool], cond: c.Expr[Boolean]): c.Expr[Unit] = {
     import c.universe._
     val expr = cond.tree.toString()
@@ -67,7 +65,6 @@ object TestTool {
   }
 
   def assert(t:TestTool, cond:Boolean) = macro assertImpl
-
 }
 
 class TestTool @throws[IOException]
