@@ -6,7 +6,7 @@ lazy val testtoys = (project in file(".")).
   settings(
     name := "testtoys",
     organization := "com.futurice",
-    version := "1.1.6.1", // Matches the sbt-version we build with. Should avoid confusion
+    version := "1.1.6.2", // Matches the sbt-version we build with. Should avoid confusion
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "junit" % "junit" % "4.8" % "test",
