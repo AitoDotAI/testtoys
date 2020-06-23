@@ -479,12 +479,18 @@ class TestTool @throws[IOException]
     v match {
       case Some(old) =>
         if (relRange.isPosInfinity||
-	    Math.abs(Math.log(time/old.toDouble)) < Math.log(relRange)||old==0) {
+	    Math.abs(Math.log(time/old.toDouble)) < Math.log(relRange)||old==0||(old==1&&v==0)) {
           i(f"(was $old$postfix)")
         } else {
           t(f"(${((time*100)/old.toDouble).toInt}%% of old $old$postfix)")
         }
       case None =>
+        peek match {
+          case "(" =>
+            read
+            while (peek != ")" && peek != "\n") read
+          case _ =>
+        }
     }
     this
   }
@@ -492,6 +498,17 @@ class TestTool @throws[IOException]
   def tLongLn(time:Long, unit:String = "", relRange:Double = 10.0): TestTool = {
     tLong(time, unit, relRange)
     ignoreToken("\n")
+  }
+
+  def tUsPerOpLn[T](opCount:Int, unit:String ="unit", relRange : Double = 10.0)(f : => T) : T = {
+    val (ms, rv) =
+      TestTool.ms(f)
+    tDoubleLn(1000*ms/opCount.toDouble, f"us/$unit", relRange)
+    rv
+  }
+
+  def iUsPerOpLn[T](opCount:Int, unit:String ="unit")(f : => T) : T = {
+    tUsPerOpLn(opCount, unit, Double.PositiveInfinity)(f)
   }
 
 
