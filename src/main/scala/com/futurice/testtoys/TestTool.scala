@@ -11,62 +11,6 @@ import java.util.List
 import scala.language.experimental.macros
 import scala.reflect.macros.Context
 
-object TestTool {
-  val INTERACTIVE: Int = 0
-  val AUTOMATIC_FREEZE: Int = 1
-  val NEVER_FREEZE: Int = 2
-  val FAIL_ON_ERROR: Int = 3
-  val UNDEFINED: String = "__UNDEFINED__"
-  val EOF: String = "__EOF__"
-
-  def ms[T](f: =>T) = {
-    val before = System.currentTimeMillis()
-    val rv = f
-    (System.currentTimeMillis-before, rv)
-  }
-
-  def time[T](f: =>T, temporalUnit: TemporalUnit) = {
-    val before = Instant.now()
-    val rv = f
-    val after = Instant.now()
-
-    (before.until(after, temporalUnit), rv)
-  }
-
-  def us[T](f: =>T) = time(f, ChronoUnit.MICROS)
-
-  sealed trait FileFormat
-  case class TextFormat(charset: Charset, lines: Long) extends FileFormat
-  case object BinaryFormat extends FileFormat
-
-  def parseTestToysMode(): Int = {
-    if (System.getenv("TESTTOYS_FAIL_ON_ERROR") != null) TestTool.FAIL_ON_ERROR
-    else if (System.getenv("TESTTOYS_NEVER_FREEZE") != null) TestTool.NEVER_FREEZE
-    else if (System.getenv("TESTTOYS_ALWAYS_FREEZE") != null) TestTool.AUTOMATIC_FREEZE
-    else TestTool.INTERACTIVE
-  }
-
-  def diffTool(): Option[Seq[String]] = {
-    Option(System.getenv("TESTTOYS_DIFF_TOOL")) match {
-      case Some("idea") => Some(Seq("idea", "diff"))
-      case _ => None
-    }
-  }
-  def assertImpl(c: Context)(t:c.Expr[TestTool], cond: c.Expr[Boolean]): c.Expr[Unit] = {
-    import c.universe._
-    val expr = cond.tree.toString()
-    val pos = c.macroApplication.pos
-    val exprStr = c.Expr[String](Literal(Constant(expr)))
-    val posStr = c.Expr[String](Literal(Constant(s"${pos.source.file.name + ":" + pos.line}")))
-
-    reify({
-      t.splice.t("asserting '" + exprStr.splice + "'..").assert(cond.splice).iln(" [" + posStr.splice + "]")
-    })
-  }
-
-  def assert(t:TestTool, cond:Boolean) = macro assertImpl
-}
-
 class TestTool @throws[IOException]
 (val path: File, var report: PrintStream, var config: Int) {
   private val outFile: File = new File(path + "_out.txt")
@@ -83,7 +27,7 @@ class TestTool @throws[IOException]
   }
 
   private val out = new FileWriter(outFile)
-  private val exp : BufferedReader =
+  private var exp : BufferedReader =
     if (expFile.exists()) {
       new BufferedReader(new FileReader(expFile))
     } else {
@@ -97,10 +41,12 @@ class TestTool @throws[IOException]
   private var errorPos: Int = -1
   private var outline: StringBuffer = null
   private var expline: String = null
+  private var explineNumber: Int = 0
+  private var lastChecked = false
+  private var lineNumber: Int = 0  // Add a line counter
 
   prepareLine
   report.println("running " + path + "...\n")
-
 
   def this(path: String) {
     this(new File(path), System.out, TestTool.parseTestToysMode())
@@ -126,17 +72,17 @@ class TestTool @throws[IOException]
 
   def fileDir: File = {
     filePath.mkdir
-    return filePath
+    filePath
   }
 
   def file(filename: String): File = {
     filePath.mkdir
-    return new File(filePath, filename)
+    new File(filePath, filename)
   }
 
   def dataFile(filename: String): File = {
     val sdf: SimpleDateFormat = new SimpleDateFormat("yyyyMMdd'T'hhmm")
-    return new File(filePath + "_" + filename + "_" + sdf.format(new Date))
+    new File(filePath + "_" + filename + "_" + sdf.format(new Date))
   }
 
   @throws[IOException]
@@ -157,38 +103,38 @@ class TestTool @throws[IOException]
   }
 
   def parse(s: String): java.util.List[String] = {
-    return Tokenizer.splitWith(s, tokenizer(_))
+    Tokenizer.splitWith(s, tokenizer(_))
   }
 
   def isExp: Boolean = {
-    return expl != null
+    expl != null
   }
 
   @throws[IOException]
   def read: String = {
     if (expl == null) return (if (exp == null) TestTool.UNDEFINED
     else TestTool.EOF)
-    return expl.next
+    expl.next
   }
 
   @throws[IOException]
   def peek: String = {
     if (expl == null) return (if (exp == null) TestTool.UNDEFINED
     else TestTool.EOF)
-    return expl.peek
+    expl.peek
   }
 
   @throws[IOException]
   def peekDouble: Option[Double] = {
     try {
-      return Some(peek.toDouble)
+      Some(peek.toDouble)
     }
     catch {
       case e: NumberFormatException => {
-        return None
+        None
       }
       case e: NullPointerException => {
-        return None
+        None
       }
     }
   }
@@ -196,10 +142,10 @@ class TestTool @throws[IOException]
   @throws[IOException]
   def peekLong: Option[Long] = {
     try {
-      return Some(peek.toLong)
+      Some(peek.toLong)
     } catch {
       case e: NumberFormatException => {
-        return None
+        None
       }
     }
   }
@@ -235,8 +181,8 @@ class TestTool @throws[IOException]
 
   def test(t: Any, e: String): Boolean = {
     (t, e) match {
-      case (_,  TestTool.UNDEFINED) => return true
-      case (_,  null) => return false
+      case (_,  TestTool.UNDEFINED) => true
+      case (_,  null) => false
       case (t:Double,e) => t - e.toDouble < 0.0000001
       case (t:String, e:String) => t == e
       case (t, e) => t.toString == e
@@ -278,7 +224,7 @@ class TestTool @throws[IOException]
   }
 
   def pos: Int = {
-    return outline.length
+    outline.length
   }
 
   def assert(cond:Boolean) = {
@@ -311,16 +257,16 @@ class TestTool @throws[IOException]
   def errorln(str:String) = eln(str)
 
   /**
-    * Print/ignore a token
-    */
+   * Print/ignore a token
+   */
   @throws[IOException]
   def i(t: Any) : TestTool = {
     ignoreToken(t)
   }
 
   /**
-    * Print a comment / ignore this line in testing
-    */
+   * Print a comment / ignore this line in testing
+   */
   @throws[IOException]
   def i(s: String) : TestTool = {
     import scala.collection.JavaConversions._
@@ -354,8 +300,8 @@ class TestTool @throws[IOException]
 
 
   /**
-    * Test this line
-    */
+   * Test this line
+   */
   @throws[IOException]
   def t(s: String) : TestTool = {
     import scala.collection.JavaConversions._
@@ -389,13 +335,13 @@ class TestTool @throws[IOException]
 
   @throws[IOException]
   def t(file: File) : TestTool = {
-     t(file, None, -1)
+    t(file, None, -1)
     this
   }
 
   @throws[IOException]
   def t(file: File, lines:Int): TestTool =  {
-     t(file, None, lines)
+    t(file, None, lines)
     this
   }
 
@@ -422,7 +368,7 @@ class TestTool @throws[IOException]
     val r =
       new BufferedReader(
         new InputStreamReader(new FileInputStream(file), format.charset))
-    try { 
+    try {
       var l: String = null
       var line = 0
       while ({l = r.readLine; l != null && line != format.lines}) {
@@ -479,7 +425,7 @@ class TestTool @throws[IOException]
     v match {
       case Some(old) =>
         if (relRange.isPosInfinity||
-	    Math.abs(Math.log(time/old.toDouble)) < Math.log(relRange)||old==0||(old==1&&v==0)) {
+          Math.abs(Math.log(time/old.toDouble)) < Math.log(relRange)||old==0||(old==1&&v==0)) {
           i(f"(was $old$postfix)")
         } else {
           t(f"(${((time*100)/old.toDouble).toInt}%% of old $old$postfix)")
@@ -518,12 +464,12 @@ class TestTool @throws[IOException]
     v match {
       case Some(old) =>
         if (relRange.isPosInfinity
-	    ||Math.abs(Math.log(time/old.toDouble)) < Math.log(relRange)||old==0) {
+          ||Math.abs(Math.log(time/old.toDouble)) < Math.log(relRange)||old==0) {
           i(f"(was $old%.3f $unit)")
         } else {
           t(f"(${((time*100)/old.toDouble).toInt}%% of old $old%.3f $unit)")
         }
-      case None =>	
+      case None =>
     }
     this
   }
@@ -585,6 +531,198 @@ class TestTool @throws[IOException]
   def iUsLn[T](f : => T) = iTimeLn(ChronoUnit.MICROS)(f)
   def tUsLn[T](f : => T) = tTimeLn(ChronoUnit.MICROS)(f)
 
+  def resetExpReader(): Unit = {
+    /** Resets the reader that reads expectation / snapshot file */
+    // Close current reader if it exists
+    if (exp != null) {
+      exp.close()
+    }
+
+    // Reopen the reader if the file exists
+    if (expFile.exists()) {
+      exp = new BufferedReader(new FileReader(expFile))
+    } else {
+      exp = null
+    }
+
+    // Reset state
+    expline = null
+    explineNumber = 0
+    expl = null
+
+    // Move to the first line
+    nextExpLine()
+  }
+
+  /**
+   * Moves snapshot reader cursor to the next snapshot file line
+   */
+  def nextExpLine(): Unit = {
+    if (exp != null) {
+      Option(exp.readLine()) match {
+        case Some(line) =>
+          explineNumber += 1
+          expline = line
+          expl = tokenizer(new StringReader(expline + "\n"))
+        case None =>
+          exp.close()
+          exp = null
+          expline = null
+          expl = null
+          explineNumber += 1
+      }
+    } else if (lastChecked) {
+      expline = null
+      expl = null
+    }
+  }
+
+  /**
+   * Moves the snapshot reader cursor to the specified line number.
+   *
+   * If line number is before current reader position, the snapshot
+   * file reader is reset.
+   */
+  def jump(lineNumber: Int): Unit = {
+    if (exp != null) {
+      if (lineNumber < explineNumber) {
+        resetExpReader()
+      }
+
+      while (expline != null && explineNumber < lineNumber) {
+        nextExpLine()
+      }
+    }
+  }
+
+  /**
+   * Seeks the next snapshot/expectation file line that matches the
+   * isLineOk function. The seeking is started on 'begin' line and
+   * it ends on the 'end' line.
+   *
+   * NOTE: The seeks starts from the cursor position,
+   * but it may restart seeking from the beginning of the file,
+   * if the sought line is not found.
+   *
+   * NOTE: this is really an O(N) scanning operation.
+   *       it may restart at the beginning of file and
+   *       it typically reads the entire file on seek failures.
+   */
+  def seek(isLineOk: String => Boolean, begin: Int = 0, end: Int = Int.MaxValue): Unit = {
+    if (exp != null) {
+      val atLineNumber = explineNumber
+
+      // scan, until the anchor is found
+      while (expline != null && !isLineOk(expline) && explineNumber < end) {
+        nextExpLine()
+      }
+
+      if (expline != null) {
+        // if anchor was not found, let's look for previous location
+        // or alternatively: let's return to the original location
+        jump(begin)
+        while (expline != null && !isLineOk(expline) && explineNumber < atLineNumber) {
+          nextExpLine()
+        }
+      }
+    }
+  }
+
+  /**
+   * Seeks the next snapshot/expectation file line matching the anchor.
+   *
+   * NOTE: The seeks starts from the cursor position,
+   * but it may restart seeking from the beginning of the file,
+   * if the sought line is not found.
+   *
+   * NOTE: this is really an O(N) scanning operation.
+   *       it may restart at the beginning of file and
+   *       it typically reads the entire file on seek failures.
+   */
+  def seekLine(anchor: String, begin: Int = 0, end: Int = Int.MaxValue): Unit = {
+    seek(x => x == anchor, begin, end)
+  }
+
+  /**
+   * Seeks the next snapshot/expectation file line matching the prefix.
+   *
+   * NOTE: The seeks starts from the cursor position,
+   * but it may restart seeking from the beginning of the file,
+   * if the sought line is not found.
+   *
+   * NOTE: this is really an O(N) scanning operation.
+   *       it may restart at the beginning of file and
+   *       it typically reads the entire file on seek failures.
+   */
+  def seekPrefix(prefix: String): Unit = {
+    seek(_.startsWith(prefix))
+  }
+
+  /**
+   * Creates an anchor at the current position in the output
+   * @param name The name of the anchor
+   * @return This TestTool instance for chaining
+   */
+  def anchor(name: String): TestTool = {
+    seekPrefix(name)
+    t(name)
+    this
+  }
+
+  def anchorln(name: String): TestTool = {
+    anchor(name + "\n")
+    this
+  }
+
+  /**
+   * Creates a header that also operates as an anchor.
+   * The header is preceded and followed by an empty line.
+   * @param header The header text
+   * @return This TestTool instance for chaining
+   */
+  @throws[IOException]
+  def header(header: String): TestTool = {
+    if (pos > 0) {
+      tln("")
+    }
+    tln("")
+    anchorln(header)
+    tln("")
+    this
+  }
+
+  /**
+   * Creates a Markdown style header with specified level
+   * @param level The header level (1-6)
+   * @param title The header title
+   * @return This TestTool instance for chaining
+   */
+  @throws[IOException]
+  def h(level: Int, title: String): TestTool = {
+    header(("#" * level) + " " + title)
+    this
+  }
+
+  @throws[IOException]
+  def h1(title: String): TestTool = {
+    h(1, title)
+    this
+  }
+
+  @throws[IOException]
+  def h2(title: String): TestTool = {
+    h(2, title)
+    this
+  }
+
+  @throws[IOException]
+  def h3(title: String): TestTool = {
+    h(3, title)
+    this
+  }
+
+
+
   // Extra action is of form (ok, expFile, outFile => (freeze, continue)
 
   type Action = (Boolean, File, File)=>(Boolean, Boolean)
@@ -608,7 +746,7 @@ class TestTool @throws[IOException]
 
         Runtime.getRuntime.exec(exec.toArray)
         (false, true)
-    })
+      })
   }
 
 
@@ -642,9 +780,9 @@ class TestTool @throws[IOException]
             throw new IllegalStateException(s"Exceeded the max retries count '${maxRetriesCount}' in ${this.getClass.toString}")
           }
 
-          System.out.print((extraActions.map(_._1) ++ Seq("[c]ontinue")).mkString(", ") +  " or [f]reeze?")
+          System.out.print((extraActions.map(_._1) ++ Seq("[c]ontinue")).mkString(", ") +  " or [a]ccept?")
           val line: String = new BufferedReader(new InputStreamReader(System.in)).readLine
-          if (line == "f") {
+          if (line == "a") {
             freeze = true
             cont = false
           } else if (line == "c") {
@@ -665,11 +803,67 @@ class TestTool @throws[IOException]
       }
       if (freeze) {
         outFile.renameTo(expFile)
-        report.println("frozen.")
+        report.println("accepted.")
         ok = true
       }
     }
     report.println
     return ok
   }
+}
+
+object TestTool {
+  val INTERACTIVE: Int = 0
+  val AUTOMATIC_FREEZE: Int = 1
+  val NEVER_FREEZE: Int = 2
+  val FAIL_ON_ERROR: Int = 3
+  val UNDEFINED: String = "__UNDEFINED__"
+  val EOF: String = "__EOF__"
+
+  def ms[T](f: =>T) = {
+    val before = System.currentTimeMillis()
+    val rv = f
+    (System.currentTimeMillis-before, rv)
+  }
+
+  def time[T](f: =>T, temporalUnit: TemporalUnit) = {
+    val before = Instant.now()
+    val rv = f
+    val after = Instant.now()
+
+    (before.until(after, temporalUnit), rv)
+  }
+
+  def us[T](f: =>T) = time(f, ChronoUnit.MICROS)
+
+  sealed trait FileFormat
+  case class TextFormat(charset: Charset, lines: Long) extends FileFormat
+  case object BinaryFormat extends FileFormat
+
+  def parseTestToysMode(): Int = {
+    if (System.getenv("TESTTOYS_FAIL_ON_ERROR") != null) TestTool.FAIL_ON_ERROR
+    else if (System.getenv("TESTTOYS_NEVER_FREEZE") != null) TestTool.NEVER_FREEZE
+    else if (System.getenv("TESTTOYS_ALWAYS_FREEZE") != null) TestTool.AUTOMATIC_FREEZE
+    else TestTool.INTERACTIVE
+  }
+
+  def diffTool(): Option[Seq[String]] = {
+    Option(System.getenv("TESTTOYS_DIFF_TOOL")) match {
+      case Some("idea") => Some(Seq("idea", "diff"))
+      case _ => None
+    }
+  }
+  def assertImpl(c: Context)(t:c.Expr[TestTool], cond: c.Expr[Boolean]): c.Expr[Unit] = {
+    import c.universe._
+    val expr = cond.tree.toString()
+    val pos = c.macroApplication.pos
+    val exprStr = c.Expr[String](Literal(Constant(expr)))
+    val posStr = c.Expr[String](Literal(Constant(s"${pos.source.file.name + ":" + pos.line}")))
+
+    reify({
+      t.splice.t("asserting '" + exprStr.splice + "'..").assert(cond.splice).iln(" [" + posStr.splice + "]")
+    })
+  }
+
+  def assert(t:TestTool, cond:Boolean) = macro assertImpl
 }
