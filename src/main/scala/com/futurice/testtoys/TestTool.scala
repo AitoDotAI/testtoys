@@ -670,7 +670,8 @@ class TestTool @throws[IOException]
   }
 
   def anchorln(name: String): TestTool = {
-    anchor(name + "\n")
+    anchor(name)
+    tln
     this
   }
 
